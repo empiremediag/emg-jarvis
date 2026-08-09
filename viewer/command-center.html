@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMG Command Center :: Empire Media Group</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230A0A0F'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='%23C9A84C' font-family='Arial, sans-serif' font-weight='bold'%3EE%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #0A0A0F;
+    --panel: #101018;
+    --panel-2: #14141F;
+    --gold: #C9A84C;
+    --cyan: #00E5FF;
+    --emerald: #00C896;
+    --red: #FF5C5C;
+    --blue: #4C9AFF;
+    --border: #26264A;
+    --text: #E8E8E0;
+    --text-dim: #8A8AA0;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  }
+  a { color: inherit; }
+  button { font-family: inherit; cursor: pointer; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ---------- App shell ---------- */
+  #app { display: flex; min-height: 100vh; }
+
+  #sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 220px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+  }
+  #sidebar .logo {
+    padding: 22px 20px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  #sidebar .logo .mark {
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: 0.18rem;
+  }
+  #sidebar .logo .sub {
+    color: var(--text-dim);
+    font-size: 0.68rem;
+    letter-spacing: 0.12rem;
+    margin-top: 3px;
+    text-transform: uppercase;
+  }
+  #nav {
+    flex: 1;
+    padding: 14px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 0.86rem;
+    text-align: left;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .nav-item:hover { background: rgba(201,168,76,0.08); color: var(--text); }
+  .nav-item.active { background: rgba(201,168,76,0.14); color: var(--gold); }
+  .nav-item svg { flex: none; width: 17px; height: 17px; opacity: 0.9; }
+  #sidebar .foot {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.68rem;
+    letter-spacing: 0.04rem;
+  }
+
+  #main {
+    margin-left: 220px;
+    flex: 1;
+    padding: 26px 32px 60px;
+    max-width: 1400px;
+  }
+
+  .view { display: none; }
+  .view.active { display: block; animation: fadein 0.15s ease; }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+  .view-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .view-header h1 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.02rem;
+  }
+  .view-header .hint { color: var(--text-dim); font-size: 0.78rem; margin-top: 4px; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 7px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02rem;
+    transition: filter 0.12s ease, transform 0.05s ease;
+  }
+  .btn:hover { filter: brightness(1.2); }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-gold { background: var(--gold); color: #1a1400; border-color: var(--gold); }
+  .btn-red { background: var(--red); color: #2a0000; border-color: var(--red); }
+  .btn-green { background: var(--emerald); color: #002a1c; border-color: var(--emerald); }
+  .btn-yellow { background: #E0C255; color: #2a2200; border-color: #E0C255; }
+  .btn-blue { background: var(--blue); color: #001a33; border-color: var(--blue); }
+  .btn-ghost { background: transparent; }
+  .btn-sm { padding: 5px 10px; font-size: 0.7rem; }
+
+  /* ---------- Cards / stat grid ---------- */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    position: relative;
+  }
+  .stat-card .dot {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+  }
+  .stat-card .num { font-size: 1.9rem; font-weight: 700; letter-spacing: 0.01rem; }
+  .stat-card .label { color: var(--text-dim); font-size: 0.74rem; letter-spacing: 0.04rem; text-transform: uppercase; margin-top: 4px; }
+
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+  .dot.green { background: var(--emerald); box-shadow: 0 0 7px var(--emerald); }
+  .dot.gold { background: var(--gold); box-shadow: 0 0 7px var(--gold); }
+  .dot.red { background: var(--red); box-shadow: 0 0 7px var(--red); }
+  .dot.grey { background: #555; }
+  .dot.cyan { background: var(--cyan); box-shadow: 0 0 7px var(--cyan); }
+  .dot.pulse { animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .panel h2 {
+    font-size: 0.92rem;
+    margin: 0 0 14px;
+    letter-spacing: 0.03rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .two-col { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+
+  /* ---------- Dashboard feed ---------- */
+  #activity-feed { display: flex; flex-direction: column; gap: 10px; max-height: 420px; overflow-y: auto; }
+  .feed-row { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid rgba(38,38,74,0.5); font-size: 0.8rem; }
+  .feed-row:last-child { border-bottom: none; }
+  .feed-row .dot { margin-top: 5px; }
+  .feed-row .agent { color: var(--gold); font-weight: 600; }
+  .feed-row .action { color: var(--text); }
+  .feed-row .time { color: var(--text-dim); font-size: 0.7rem; white-space: nowrap; margin-left: auto; padding-left: 10px; }
+
+  .queue-preview-item { padding: 10px 0; border-bottom: 1px solid rgba(38,38,74,0.5); font-size: 0.82rem; }
+  .queue-preview-item:last-child { border-bottom: none; }
+  .queue-preview-item .title { font-weight: 600; }
+  .queue-preview-item .meta { color: var(--text-dim); font-size: 0.72rem; margin-top: 2px; }
+
+  /* ---------- Tabs ---------- */
+  .tabs { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .tab-btn {
+    background: transparent; border: none; color: var(--text-dim);
+    padding: 9px 14px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.03rem;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ---------- Content Studio job cards ---------- */
+  .job-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .job-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .job-card .top-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .job-card .title { font-weight: 600; font-size: 0.92rem; }
+  .badge { font-size: 0.65rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.03rem; white-space: nowrap; }
+  .badge-queued { background: rgba(138,138,160,0.2); color: #b8b8cc; }
+  .badge-generating { background: rgba(201,168,76,0.18); color: var(--gold); }
+  .badge-processing { background: rgba(0,229,255,0.18); color: var(--cyan); }
+  .badge-complete { background: rgba(0,200,150,0.18); color: var(--emerald); }
+  .badge-failed { background: rgba(255,92,92,0.18); color: var(--red); }
+
+  .progress-track { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; margin: 12px 0 10px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--emerald), var(--gold)); }
+
+  .job-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; font-size: 0.73rem; color: var(--text-dim); margin-bottom: 12px; }
+  .job-meta span.v { color: var(--text); }
+
+  .job-card .actions { display: flex; justify-content: flex-end; }
+
+  /* ---------- Review queue ---------- */
+  .review-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .review-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .thumb { height: 130px; background: repeating-linear-gradient(135deg, #1b1b28, #1b1b28 10px, #202030 10px, #202030 20px); display: flex; align-items: center; justify-content: center; }
+  .thumb .play { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; }
+  .review-body { padding: 12px 14px 14px; }
+  .review-body .title { font-weight: 600; font-size: 0.85rem; margin-bottom: 3px; }
+  .review-body .meta { color: var(--text-dim); font-size: 0.7rem; margin-bottom: 12px; }
+  .review-actions { display: flex; gap: 8px; }
+  .review-actions .btn { flex: 1; }
+  .review-actions-2 { display: flex; gap: 8px; margin-top: 8px; }
+  .review-actions-2 .btn { flex: 1; }
+  .status-pill { font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; }
+  .status-approved { background: rgba(0,200,150,0.18); color: var(--emerald); }
+  .status-rejected { background: rgba(255,92,92,0.18); color: var(--red); }
+
+  /* ---------- Agent Control ---------- */
+  .agent-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-bottom: 1px solid rgba(38,38,74,0.5);
+    font-size: 0.82rem;
+  }
+  .agent-row:last-child { border-bottom: none; }
+  .agent-row .name { font-weight: 600; min-width: 170px; }
+  .agent-row .type-badge { font-size: 0.63rem; color: var(--text-dim); border: 1px solid var(--border); padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .agent-row .desc { color: var(--text-dim); font-size: 0.74rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .agent-row .tools { color: var(--text-dim); font-size: 0.72rem; white-space: nowrap; }
+  .agent-row .row-actions { display: flex; gap: 6px; margin-left: 10px; }
+
+  /* ---------- Ad Tracker table ---------- */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  th { text-align: left; color: var(--text-dim); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04rem; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 10px 10px; border-bottom: 1px solid rgba(38,38,74,0.5); white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .platform-chip { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; font-size: 0.62rem; font-weight: 700; color: #fff; }
+  .plat-facebook { background: #1877F2; }
+  .plat-instagram { background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); }
+  .plat-tiktok { background: #111; border: 1px solid #444; }
+  .plat-linkedin { background: #0A66C2; }
+  .plat-youtube { background: #FF0000; }
+  .status-active { color: var(--emerald); }
+  .status-paused { color: var(--text-dim); }
+
+  /* ---------- Social queue ---------- */
+  .view-toggle { display: flex; gap: 4px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+  .view-toggle button { border: none; background: transparent; color: var(--text-dim); padding: 6px 14px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+  .view-toggle button.active { background: var(--gold); color: #1a1400; }
+
+  .post-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-bottom: 1px solid rgba(38,38,74,0.5); font-size: 0.82rem; }
+  .post-row:last-child { border-bottom: none; }
+  .post-row .platforms { display: flex; gap: 4px; }
+  .post-row .preview { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .post-row .when { color: var(--text-dim); font-size: 0.74rem; white-space: nowrap; }
+  .post-status { font-size: 0.65rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; text-transform: uppercase; white-space: nowrap; }
+  .post-status.Scheduled { background: rgba(0,229,255,0.15); color: var(--cyan); }
+  .post-status.Published { background: rgba(0,200,150,0.18); color: var(--emerald); }
+  .post-status.Failed { background: rgba(255,92,92,0.18); color: var(--red); }
+
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+  .cal-day { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px; min-height: 90px; cursor: pointer; transition: border-color 0.12s ease; }
+  .cal-day:hover { border-color: var(--gold); }
+  .cal-day.selected { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+  .cal-day .dow { color: var(--text-dim); font-size: 0.65rem; text-transform: uppercase; }
+  .cal-day .dnum { font-weight: 700; font-size: 1rem; margin: 2px 0 8px; }
+  .cal-day .dots { display: flex; flex-wrap: wrap; gap: 3px; }
+  .cal-day .dots .dot { width: 7px; height: 7px; }
+
+  #cal-side { margin-top: 16px; }
+  #cal-side.empty { color: var(--text-dim); font-size: 0.8rem; }
+
+  /* ---------- Analytics ---------- */
+  .range-toggle { display: flex; gap: 4px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+  .range-toggle button { border: none; background: transparent; color: var(--text-dim); padding: 6px 14px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+  .range-toggle button.active { background: var(--gold); color: #1a1400; }
+
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 0.78rem; }
+  .bar-row .bar-label { width: 100px; flex: none; color: var(--text-dim); }
+  .bar-row .bar-track { flex: 1; background: rgba(255,255,255,0.06); border-radius: 4px; height: 16px; overflow: hidden; }
+  .bar-row .bar-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), var(--emerald)); border-radius: 4px; }
+  .bar-row .bar-val { width: 46px; flex: none; text-align: right; color: var(--text); }
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; width: 420px; max-width: 92vw; max-height: 86vh; overflow-y: auto;
+  }
+  .modal h3 { margin: 0 0 10px; font-size: 1rem; }
+  .modal p { color: var(--text-dim); font-size: 0.85rem; line-height: 1.5; }
+  .modal .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03rem; margin-bottom: 6px; }
+  .field input[type=text], .field input[type=datetime-local], .field textarea {
+    width: 100%; background: var(--panel-2); border: 1px solid var(--border); border-radius: 7px;
+    color: var(--text); padding: 9px 10px; font-size: 0.82rem; font-family: inherit;
+  }
+  .field textarea { min-height: 80px; resize: vertical; }
+  .checkbox-row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .checkbox-row label { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text); text-transform: none; letter-spacing: 0; }
+
+  .empty-state { color: var(--text-dim); font-size: 0.82rem; padding: 20px 4px; }
+
+  /* ---------- Toast ---------- */
+  #toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--panel-2); border: 1px solid var(--gold); color: var(--text);
+    padding: 10px 18px; border-radius: 8px; font-size: 0.82rem; z-index: 200;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 900px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="sidebar">
+    <div class="logo">
+      <div class="mark">EMG-OS</div>
+      <div class="sub">Command Center</div>
+    </div>
+    <nav id="nav">
+      <button class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-item" data-view="content-studio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/></svg>
+        <span>Content Studio</span>
+      </button>
+      <button class="nav-item" data-view="agent-control">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.2"/><path d="M4.5 20c1.4-4 4-6 7.5-6s6.1 2 7.5 6"/></svg>
+        <span>Agent Control</span>
+      </button>
+      <button class="nav-item" data-view="ad-tracker">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l5-6 4 3 6-8"/><path d="M14 6h4v4"/></svg>
+        <span>Ad Tracker</span>
+      </button>
+      <button class="nav-item" data-view="social-queue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 2v4M16 2v4"/></svg>
+        <span>Social Queue</span>
+      </button>
+      <button class="nav-item" data-view="analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+        <span>Analytics</span>
+      </button>
+    </nav>
+    <div class="foot">Empire Media Group<br>85-agent fleet</div>
+  </div>
+
+  <div id="main">
+
+    <!-- ===== DASHBOARD ===== -->
+    <section class="view active" id="view-dashboard">
+      <div class="view-header">
+        <div>
+          <h1>Dashboard</h1>
+          <div class="hint">Live overview of the EMG-JARVIS fleet</div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><span class="dot gold" id="stat-total-dot"></span>
+          <div class="num" id="stat-total">--</div><div class="label">Total Agents</div></div>
+        <div class="stat-card"><span class="dot green pulse" id="stat-active-dot"></span>
+          <div class="num" id="stat-active">--</div><div class="label">Active Agents</div></div>
+        <div class="stat-card"><span class="dot cyan" id="stat-content-dot"></span>
+          <div class="num" id="stat-content">--</div><div class="label">Content In Progress</div></div>
+        <div class="stat-card"><span class="dot gold" id="stat-ads-dot"></span>
+          <div class="num" id="stat-ads">--</div><div class="label">Ads Running</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <h2>Live Agent Feed <span style="color:var(--text-dim); font-weight:400; font-size:0.68rem;">auto-refresh 10s</span></h2>
+          <div id="activity-feed"><div class="empty-state">Loading...</div></div>
+        </div>
+        <div class="panel">
+          <h2>Content Queue Preview</h2>
+          <div id="queue-preview"><div class="empty-state">Loading...</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CONTENT STUDIO ===== -->
+    <section class="view" id="view-content-studio">
+      <div class="view-header">
+        <div>
+          <h1>Content Studio</h1>
+          <div class="hint">Video and content production pipeline</div>
+        </div>
+        <button class="btn" id="content-refresh-btn">Refresh</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="in-production">In Production</button>
+        <button class="tab-btn" data-tab="review-queue">Review Queue</button>
+      </div>
+
+      <div class="tab-panel active" id="tab-in-production">
+        <div class="job-grid" id="job-grid"><div class="empty-state">Loading...</div></div>
+      </div>
+
+      <div class="tab-panel" id="tab-review-queue">
+        <div class="review-grid" id="review-grid"><div class="empty-state">Loading...</div></div>
+      </div>
+    </section>
+
+    <!-- ===== AGENT CONTROL ===== -->
+    <section class="view" id="view-agent-control">
+      <div class="view-header">
+        <div>
+          <h1>Agent Control</h1>
+          <div class="hint">Kill, pause, or resume any agent in the fleet</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-green" id="resume-all-btn">Resume All</button>
+          <button class="btn btn-red" id="kill-all-btn">Kill All</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-agent-tab="SUPER_AGENTS">Super Agents</button>
+        <button class="tab-btn" data-agent-tab="VOICE_AI">Voice AI</button>
+        <button class="tab-btn" data-agent-tab="CONVERSATION_AI">Conversation AI</button>
+      </div>
+
+      <div class="panel" style="padding: 6px 14px;">
+        <div id="agent-list"><div class="empty-state">Loading...</div></div>
+      </div>
+    </section>
+
+    <!-- ===== AD TRACKER ===== -->
+    <section class="view" id="view-ad-tracker">
+      <div class="view-header">
+        <div>
+          <h1>Ad Tracker</h1>
+          <div class="hint">Cross-platform ad performance and keyword responses</div>
+        </div>
+      </div>
+
+      <div class="stat-grid" id="ad-stat-grid" style="grid-template-columns: repeat(6, 1fr);">
+        <div class="stat-card"><span class="dot green"></span><div class="num" id="ads-active">--</div><div class="label">Ads Active</div></div>
+        <div class="stat-card"><span class="dot gold"></span><div class="num" id="ads-impressions">--</div><div class="label">Impressions</div></div>
+        <div class="stat-card"><span class="dot cyan"></span><div class="num" id="ads-clicks">--</div><div class="label">Clicks</div></div>
+        <div class="stat-card"><span class="dot gold"></span><div class="num" id="ads-ctr">--</div><div class="label">CTR</div></div>
+        <div class="stat-card"><span class="dot red"></span><div class="num" id="ads-spend">--</div><div class="label">Spend</div></div>
+        <div class="stat-card"><span class="dot green"></span><div class="num" id="ads-leads">--</div><div class="label">Leads</div></div>
+      </div>
+
+      <div class="panel" style="margin-bottom: 20px;">
+        <h2>All Ads</h2>
+        <div class="table-wrap">
+          <table id="ads-table">
+            <thead><tr>
+              <th>Platform</th><th>Ad Name</th><th>Status</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Spend</th><th>Leads</th><th>Last Updated</th><th>Actions</th>
+            </tr></thead>
+            <tbody><tr><td colspan="10" class="empty-state">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Keyword Response Log</h2>
+        <div class="table-wrap">
+          <table id="keyword-table">
+            <thead><tr>
+              <th>Timestamp</th><th>Keyword</th><th>Platform</th><th>Comment/Message</th><th>Agent</th><th>Response Action</th><th>Status</th>
+            </tr></thead>
+            <tbody><tr><td colspan="7" class="empty-state">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SOCIAL QUEUE ===== -->
+    <section class="view" id="view-social-queue">
+      <div class="view-header">
+        <div>
+          <h1>Social Queue</h1>
+          <div class="hint">Scheduled and published posts across platforms</div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <div class="view-toggle">
+            <button class="active" data-social-view="list">List</button>
+            <button data-social-view="calendar">Calendar</button>
+          </div>
+          <button class="btn btn-gold" id="add-post-btn">+ Add Post</button>
+        </div>
+      </div>
+
+      <div id="social-list-view">
+        <div class="panel">
+          <div id="post-list"><div class="empty-state">Loading...</div></div>
+        </div>
+      </div>
+
+      <div id="social-calendar-view" style="display:none;">
+        <div class="calendar-grid" id="calendar-grid"></div>
+        <div class="panel" id="cal-side"></div>
+      </div>
+    </section>
+
+    <!-- ===== ANALYTICS ===== -->
+    <section class="view" id="view-analytics">
+      <div class="view-header">
+        <div>
+          <h1>Analytics</h1>
+          <div class="hint">Fleet performance and pipeline metrics</div>
+        </div>
+        <div class="range-toggle" id="range-toggle">
+          <button class="active" data-range="today">Today</button>
+          <button data-range="7d">7 Days</button>
+          <button data-range="30d">30 Days</button>
+          <button data-range="all">All Time</button>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><span class="dot gold"></span><div class="num" id="an-leads">--</div><div class="label">Total Leads</div></div>
+        <div class="stat-card"><span class="dot cyan"></span><div class="num" id="an-calls">--</div><div class="label">Calls Booked</div></div>
+        <div class="stat-card"><span class="dot green"></span><div class="num" id="an-deals">--</div><div class="label">Deals Closed</div></div>
+        <div class="stat-card"><span class="dot gold"></span><div class="num" id="an-revenue">--</div><div class="label">Revenue</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <h2>Leads by Source</h2>
+          <div id="chart-source"></div>
+        </div>
+        <div class="panel">
+          <h2>Agent Performance</h2>
+          <div id="chart-agents"></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- Kill-all confirm modal -->
+<div class="modal-backdrop" id="kill-all-modal">
+  <div class="modal">
+    <h3>Kill all 85 agents?</h3>
+    <p>This stops all automation. Every agent in the fleet -- Super Agents, Voice AI, and Conversation AI -- will be immediately killed until resumed.</p>
+    <div class="modal-actions">
+      <button class="btn" id="kill-all-cancel">Cancel</button>
+      <button class="btn btn-red" id="kill-all-confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add post modal -->
+<div class="modal-backdrop" id="add-post-modal">
+  <div class="modal">
+    <h3>Schedule a post</h3>
+    <div class="field">
+      <label>Platforms</label>
+      <div class="checkbox-row">
+        <label><input type="checkbox" value="facebook" checked> Facebook</label>
+        <label><input type="checkbox" value="instagram"> Instagram</label>
+        <label><input type="checkbox" value="tiktok"> TikTok</label>
+        <label><input type="checkbox" value="linkedin"> LinkedIn</label>
+        <label><input type="checkbox" value="youtube"> YouTube</label>
+      </div>
+    </div>
+    <div class="field">
+      <label>Content</label>
+      <textarea id="post-content" placeholder="What do you want to post?"></textarea>
+    </div>
+    <div class="field">
+      <label>Attach media (optional)</label>
+      <input type="text" id="post-media" placeholder="media filename or URL">
+    </div>
+    <div class="field">
+      <label>Schedule date/time</label>
+      <input type="datetime-local" id="post-when">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="add-post-cancel">Cancel</button>
+      <button class="btn btn-gold" id="add-post-submit">Submit</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var API = "";
+  var state = {
+    agentTab: "SUPER_AGENTS",
+    agentsCache: [],
+    socialView: "list",
+    socialPosts: [],
+    selectedDay: null,
+    analyticsRange: "today",
+  };
+
+  // ---------- helpers ----------
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function truncate(s, n) {
+    s = String(s == null ? "" : s);
+    return s.length > n ? s.slice(0, n - 1) + "…" : s;
+  }
+  function fmtNum(n) { return Number(n || 0).toLocaleString("en-US"); }
+  function fmtMoney(n) { return "$" + Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function timeAgo(iso) {
+    var then = new Date(iso).getTime();
+    var diff = Math.max(0, Math.round((Date.now() - then) / 1000));
+    if (diff < 60) return diff + "s ago";
+    if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
+    return Math.floor(diff / 86400) + "d ago";
+  }
+  function fmtDateTime(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var el = $("#toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove("show"); }, 2600);
+  }
+
+  function api(path, opts) {
+    opts = opts || {};
+    var fetchOpts = { method: opts.method || "GET", headers: {} };
+    if (opts.body) {
+      fetchOpts.headers["Content-Type"] = "application/json";
+      fetchOpts.body = JSON.stringify(opts.body);
+    }
+    return fetch(API + path, fetchOpts).then(function (res) {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    });
+  }
+
+  // ---------- nav / routing ----------
+  var VIEWS = ["dashboard", "content-studio", "agent-control", "ad-tracker", "social-queue", "analytics"];
+  function showView(view) {
+    VIEWS.forEach(function (v) {
+      $("#view-" + v).classList.toggle("active", v === view);
+    });
+    $all(".nav-item").forEach(function (btn) {
+      btn.classList.toggle("active", btn.dataset.view === view);
+    });
+    if (view === "dashboard") { loadDashboard(); }
+    else if (view === "content-studio") { loadContentStudio(); }
+    else if (view === "agent-control") { loadAgents(); }
+    else if (view === "ad-tracker") { loadAdTracker(); }
+    else if (view === "social-queue") { loadSocialQueue(); }
+    else if (view === "analytics") { loadAnalytics(); }
+  }
+  $all(".nav-item").forEach(function (btn) {
+    btn.addEventListener("click", function () { showView(btn.dataset.view); });
+  });
+
+  // ======================================================================
+  // DASHBOARD
+  // ======================================================================
+  function loadDashboard() {
+    api("/status").then(function (d) {
+      $("#stat-total").textContent = fmtNum(d.total);
+      $("#stat-active").textContent = fmtNum(d.active);
+    }).catch(function () {});
+
+    api("/content/status").then(function (d) {
+      var inProgress = (d.jobs || []).filter(function (j) {
+        return ["Queued", "Generating", "Processing"].indexOf(j.status) !== -1;
+      }).length;
+      $("#stat-content").textContent = fmtNum(inProgress);
+    }).catch(function () {});
+
+    api("/ads/tracker").then(function (d) {
+      var running = (d.ads || []).filter(function (a) { return a.status === "active"; }).length;
+      $("#stat-ads").textContent = fmtNum(running);
+    }).catch(function () {});
+
+    api("/content/queue").then(function (d) {
+      renderQueuePreview(d.items || []);
+    }).catch(function () {});
+
+    refreshActivityFeed();
+  }
+
+  function renderQueuePreview(items) {
+    var pending = items.filter(function (i) { return i.status === "pending_review"; }).slice(0, 3);
+    var el = $("#queue-preview");
+    if (!pending.length) { el.innerHTML = '<div class="empty-state">Nothing waiting on review.</div>'; return; }
+    el.innerHTML = pending.map(function (i) {
+      return '<div class="queue-preview-item">' +
+        '<div class="title">' + esc(i.title) + '</div>' +
+        '<div class="meta">' + esc(i.type) + ' &middot; ' + esc(fmtDateTime(i.created_at)) + '</div>' +
+        '</div>';
+    }).join("");
+  }
+
+  function refreshActivityFeed() {
+    api("/activity").then(function (d) {
+      var events = d.events || [];
+      var el = $("#activity-feed");
+      if (!events.length) { el.innerHTML = '<div class="empty-state">No recent activity.</div>'; return; }
+      el.innerHTML = events.map(function (e) {
+        var dotClass = e.status === "warn" ? "gold" : (e.status === "error" ? "red" : "green");
+        return '<div class="feed-row">' +
+          '<span class="dot ' + dotClass + '"></span>' +
+          '<div><span class="agent">' + esc(e.agent) + '</span> <span class="action">' + esc(e.action) + '</span></div>' +
+          '<span class="time">' + esc(timeAgo(e.time)) + '</span>' +
+          '</div>';
+      }).join("");
+    }).catch(function () {});
+  }
+  setInterval(refreshActivityFeed, 10000);
+
+  // ======================================================================
+  // CONTENT STUDIO
+  // ======================================================================
+  var STATUS_BADGE = {
+    "Queued": "badge-queued", "Generating": "badge-generating",
+    "Processing": "badge-processing", "Complete": "badge-complete", "Failed": "badge-failed",
+  };
+
+  function loadContentStudio() {
+    loadJobs();
+    loadReviewQueue();
+  }
+
+  function loadJobs() {
+    var el = $("#job-grid");
+    api("/content/status").then(function (d) {
+      var jobs = d.jobs || [];
+      if (!jobs.length) { el.innerHTML = '<div class="empty-state">No content jobs.</div>'; return; }
+      el.innerHTML = jobs.map(renderJobCard).join("");
+      $all(".job-kill-btn", el).forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.dataset.id;
+          btn.disabled = true;
+          api("/content/kill", { method: "POST", body: { job_id: id } }).then(function () {
+            toast("Job killed.");
+            loadJobs();
+          }).catch(function () { toast("Failed to kill job."); btn.disabled = false; });
+        });
+      });
+    }).catch(function () { el.innerHTML = '<div class="empty-state">Failed to load content jobs.</div>'; });
+  }
+
+  function renderJobCard(job) {
+    var pct = job.clips_total ? Math.round((job.clips_done / job.clips_total) * 100) : 0;
+    var badge = STATUS_BADGE[job.status] || "badge-queued";
+    var killDisabled = (job.status === "Complete" || job.status === "Failed") ? "disabled" : "";
+    return '<div class="job-card">' +
+      '<div class="top-row"><div class="title">' + esc(job.title) + '</div>' +
+      '<span class="badge ' + badge + '">' + esc(job.status) + '</span></div>' +
+      '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="job-meta">' +
+      '<div>Model: <span class="v">' + esc(job.model) + '</span></div>' +
+      '<div>Clip <span class="v">' + job.clips_done + ' of ' + job.clips_total + '</span></div>' +
+      '<div>Credits: <span class="v">' + fmtNum(job.credits_used) + '</span></div>' +
+      '<div>Agent: <span class="v">' + esc(job.agent) + '</span></div>' +
+      '<div style="grid-column:1/-1;">Started: <span class="v">' + esc(fmtDateTime(job.started_at)) + '</span></div>' +
+      '</div>' +
+      '<div class="actions"><button class="btn btn-red btn-sm job-kill-btn" data-id="' + esc(job.id) + '" ' + killDisabled + '>Kill</button></div>' +
+      '</div>';
+  }
+
+  $("#content-refresh-btn").addEventListener("click", loadJobs);
+
+  function loadReviewQueue() {
+    var el = $("#review-grid");
+    api("/content/queue").then(function (d) {
+      var items = d.items || [];
+      if (!items.length) { el.innerHTML = '<div class="empty-state">Nothing in the review queue.</div>'; return; }
+      el.innerHTML = items.map(renderReviewCard).join("");
+      wireReviewActions(el);
+    }).catch(function () { el.innerHTML = '<div class="empty-state">Failed to load review queue.</div>'; });
+  }
+
+  function renderReviewCard(item) {
+    var extra = "";
+    if (item.status === "approved") {
+      extra = '<div class="review-actions-2">' +
+        '<button class="btn btn-blue btn-sm">Schedule Organic</button>' +
+        '<button class="btn btn-gold btn-sm">Run As Ad</button>' +
+        '</div>';
+    }
+    var statusPill = "";
+    if (item.status === "approved") statusPill = '<span class="status-pill status-approved">Approved</span>';
+    else if (item.status === "rejected") statusPill = '<span class="status-pill status-rejected">Rejected</span>';
+
+    var actions = item.status === "pending_review"
+      ? '<div class="review-actions">' +
+        '<button class="btn btn-green btn-sm review-approve-btn" data-id="' + esc(item.id) + '">Approve</button>' +
+        '<button class="btn btn-red btn-sm review-reject-btn" data-id="' + esc(item.id) + '">Reject</button>' +
+        '</div>'
+      : '<div class="review-actions">' + statusPill + '</div>';
+
+    return '<div class="review-card">' +
+      '<div class="thumb"><div class="play">&#9654;</div></div>' +
+      '<div class="review-body">' +
+      '<div class="title">' + esc(item.title) + '</div>' +
+      '<div class="meta">' + esc(item.type) + ' &middot; ' + esc(fmtDateTime(item.created_at)) + '</div>' +
+      actions + extra +
+      '</div></div>';
+  }
+
+  function wireReviewActions(root) {
+    $all(".review-approve-btn", root).forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        api("/content/approve", { method: "POST", body: { id: btn.dataset.id } }).then(function () {
+          toast("Approved.");
+          loadReviewQueue();
+        }).catch(function () { toast("Failed to approve."); });
+      });
+    });
+    $all(".review-reject-btn", root).forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        api("/content/reject", { method: "POST", body: { id: btn.dataset.id } }).then(function () {
+          toast("Rejected.");
+          loadReviewQueue();
+        }).catch(function () { toast("Failed to reject."); });
+      });
+    });
+  }
+
+  $all(".tab-btn[data-tab]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      $all(".tab-btn[data-tab]").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      $all(".tab-panel").forEach(function (p) { p.classList.remove("active"); });
+      $("#tab-" + btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  // ======================================================================
+  // AGENT CONTROL
+  // ======================================================================
+  function loadAgents() {
+    api("/status/agents").then(function (agents) {
+      state.agentsCache = agents;
+      renderAgentList();
+    }).catch(function () {
+      $("#agent-list").innerHTML = '<div class="empty-state">Failed to load agents.</div>';
+    });
+  }
+  setInterval(function () {
+    if (!$("#view-agent-control").classList.contains("active")) return;
+    api("/status/agents").then(function (agents) {
+      state.agentsCache = agents;
+      renderAgentList();
+    }).catch(function () {});
+  }, 15000);
+
+  function statusDot(status) {
+    if (status === "active") return '<span class="dot green pulse"></span>';
+    if (status === "processing") return '<span class="dot gold pulse"></span>';
+    if (status === "killed") return '<span class="dot red"></span>';
+    return '<span class="dot grey"></span>';
+  }
+
+  function renderAgentList() {
+    var el = $("#agent-list");
+    var list = state.agentsCache.filter(function (a) { return a.group === state.agentTab; });
+    if (!list.length) { el.innerHTML = '<div class="empty-state">No agents in this group.</div>'; return; }
+    el.innerHTML = list.map(function (a) {
+      var actions = a.status === "killed"
+        ? '<button class="btn btn-green btn-sm agent-resume-btn" data-name="' + esc(a.name) + '">Resume</button>'
+        : '<button class="btn btn-yellow btn-sm agent-pause-btn" data-name="' + esc(a.name) + '">Pause</button>' +
+          '<button class="btn btn-red btn-sm agent-kill-btn" data-name="' + esc(a.name) + '">Kill</button>';
+      return '<div class="agent-row">' +
+        statusDot(a.status) +
+        '<span class="name">' + esc(a.name) + '</span>' +
+        '<span class="type-badge">' + esc(a.type) + '</span>' +
+        '<span class="desc" title="' + esc(a.description) + '">' + esc(truncate(a.description, 90)) + '</span>' +
+        '<span class="tools">' + fmtNum(a.tools) + ' tools</span>' +
+        '<span class="row-actions">' + actions + '</span>' +
+        '</div>';
+    }).join("");
+
+    $all(".agent-kill-btn", el).forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        btn.disabled = true;
+        api("/agent/kill", { method: "POST", body: { name: btn.dataset.name } }).then(function () {
+          toast(btn.dataset.name + " killed.");
+          loadAgents();
+        }).catch(function () { toast("Failed to kill agent."); btn.disabled = false; });
+      });
+    });
+    $all(".agent-resume-btn", el).forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        btn.disabled = true;
+        api("/agent/resume", { method: "POST", body: { name: btn.dataset.name } }).then(function () {
+          toast(btn.dataset.name + " resumed.");
+          loadAgents();
+        }).catch(function () { toast("Failed to resume agent."); btn.disabled = false; });
+      });
+    });
+    $all(".agent-pause-btn", el).forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        toast(btn.dataset.name + " paused.");
+      });
+    });
+  }
+
+  $all(".tab-btn[data-agent-tab]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      $all(".tab-btn[data-agent-tab]").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      state.agentTab = btn.dataset.agentTab;
+      renderAgentList();
+    });
+  });
+
+  $("#kill-all-btn").addEventListener("click", function () { $("#kill-all-modal").classList.add("open"); });
+  $("#kill-all-cancel").addEventListener("click", function () { $("#kill-all-modal").classList.remove("open"); });
+  $("#kill-all-confirm").addEventListener("click", function () {
+    api("/agent/kill-all", { method: "POST" }).then(function (d) {
+      toast("Killed " + (d.count || 0) + " agents.");
+      $("#kill-all-modal").classList.remove("open");
+      loadAgents();
+    }).catch(function () { toast("Failed to kill all agents."); });
+  });
+  $("#resume-all-btn").addEventListener("click", function () {
+    api("/agent/resume-all", { method: "POST" }).then(function (d) {
+      toast("Resumed " + (d.count || 0) + " agents.");
+      loadAgents();
+    }).catch(function () { toast("Failed to resume all agents."); });
+  });
+
+  // ======================================================================
+  // AD TRACKER
+  // ======================================================================
+  var PLAT_LABEL = { facebook: "FB", instagram: "IG", tiktok: "TT", linkedin: "LI", youtube: "YT" };
+
+  function platformChip(p) {
+    return '<span class="platform-chip plat-' + esc(p) + '">' + esc(PLAT_LABEL[p] || p.slice(0, 2).toUpperCase()) + '</span>';
+  }
+
+  function loadAdTracker() {
+    api("/ads/tracker").then(function (d) {
+      var ads = d.ads || [];
+      var summary = d.summary || {};
+      $("#ads-active").textContent = fmtNum(summary.active);
+      $("#ads-impressions").textContent = fmtNum(summary.impressions);
+      $("#ads-clicks").textContent = fmtNum(summary.clicks);
+      $("#ads-ctr").textContent = (summary.ctr || 0) + "%";
+      $("#ads-spend").textContent = fmtMoney(summary.spend);
+      $("#ads-leads").textContent = fmtNum(summary.leads);
+
+      var tbody = $("#ads-table tbody");
+      if (!ads.length) { tbody.innerHTML = '<tr><td colspan="10" class="empty-state">No ads found.</td></tr>'; }
+      else {
+        tbody.innerHTML = ads.map(function (ad) {
+          var ctr = ad.impressions ? ((ad.clicks / ad.impressions) * 100).toFixed(2) : "0.00";
+          return '<tr>' +
+            '<td>' + platformChip(ad.platform) + '</td>' +
+            '<td>' + esc(ad.ad_name) + '</td>' +
+            '<td class="status-' + esc(ad.status) + '">' + esc(ad.status) + '</td>' +
+            '<td>' + fmtNum(ad.impressions) + '</td>' +
+            '<td>' + fmtNum(ad.clicks) + '</td>' +
+            '<td>' + ctr + '%</td>' +
+            '<td>' + fmtMoney(ad.spend) + '</td>' +
+            '<td>' + fmtNum(ad.leads) + '</td>' +
+            '<td>' + esc(timeAgo(ad.last_updated)) + '</td>' +
+            '<td><button class="btn btn-sm" data-ad-toggle="' + esc(ad.id) + '">' + (ad.status === "active" ? "Pause" : "Resume") + '</button> ' +
+            '<button class="btn btn-sm btn-ghost" data-ad-view="' + esc(ad.id) + '">View</button></td>' +
+            '</tr>';
+        }).join("");
+        $all("[data-ad-toggle]", tbody).forEach(function (btn) {
+          btn.addEventListener("click", function () { toast("Ad status toggling isn't wired to a backend yet."); });
+        });
+        $all("[data-ad-view]", tbody).forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var ad = ads.filter(function (a) { return a.id === btn.dataset.adView; })[0];
+            if (ad) toast(ad.ad_name + ": " + fmtNum(ad.impressions) + " impressions, " + fmtNum(ad.leads) + " leads");
+          });
+        });
+      }
+
+      var klog = d.keyword_log || [];
+      var ktbody = $("#keyword-table tbody");
+      if (!klog.length) { ktbody.innerHTML = '<tr><td colspan="7" class="empty-state">No keyword events.</td></tr>'; }
+      else {
+        ktbody.innerHTML = klog.map(function (k) {
+          return '<tr>' +
+            '<td>' + esc(fmtDateTime(k.time)) + '</td>' +
+            '<td>' + esc(k.keyword) + '</td>' +
+            '<td>' + esc(k.platform) + '</td>' +
+            '<td>' + esc(truncate(k.snippet, 60)) + '</td>' +
+            '<td>' + esc(k.agent) + '</td>' +
+            '<td>' + esc(k.action) + '</td>' +
+            '<td>' + esc(k.status) + '</td>' +
+            '</tr>';
+        }).join("");
+      }
+    }).catch(function () {
+      $("#ads-table tbody").innerHTML = '<tr><td colspan="10" class="empty-state">Failed to load ads.</td></tr>';
+    });
+  }
+
+  // ======================================================================
+  // SOCIAL QUEUE
+  // ======================================================================
+  function loadSocialQueue() {
+    api("/social/schedule").then(function (d) {
+      state.socialPosts = d.posts || [];
+      renderSocialList();
+      renderCalendar();
+    }).catch(function () {
+      $("#post-list").innerHTML = '<div class="empty-state">Failed to load schedule.</div>';
+    });
+  }
+
+  function renderSocialList() {
+    var el = $("#post-list");
+    var posts = state.socialPosts.slice().sort(function (a, b) { return new Date(a.scheduled_at) - new Date(b.scheduled_at); });
+    if (!posts.length) { el.innerHTML = '<div class="empty-state">No posts scheduled.</div>'; return; }
+    el.innerHTML = posts.map(function (p) {
+      return '<div class="post-row">' +
+        '<span class="platforms">' + p.platforms.map(platformChip).join("") + '</span>' +
+        '<span class="preview">' + esc(truncate(p.text, 60)) + '</span>' +
+        '<span class="when">' + esc(fmtDateTime(p.scheduled_at)) + '</span>' +
+        '<span class="post-status ' + esc(p.status) + '">' + esc(p.status) + '</span>' +
+        '<span style="display:flex; gap:6px;">' +
+        '<button class="btn btn-sm" data-post-edit="' + esc(p.id) + '">Edit</button>' +
+        '<button class="btn btn-sm btn-red" data-post-cancel="' + esc(p.id) + '">Cancel</button>' +
+        '</span>' +
+        '</div>';
+    }).join("");
+    $all("[data-post-edit]", el).forEach(function (btn) {
+      btn.addEventListener("click", function () { toast("Editing isn't wired to a backend yet."); });
+    });
+    $all("[data-post-cancel]", el).forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.dataset.postCancel;
+        state.socialPosts = state.socialPosts.filter(function (p) { return p.id !== id; });
+        renderSocialList();
+        renderCalendar();
+        toast("Post removed from queue.");
+      });
+    });
+  }
+
+  function dayKey(d) { return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+
+  function renderCalendar() {
+    var grid = $("#calendar-grid");
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var days = [];
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(today);
+      d.setDate(today.getDate() + i);
+      days.push(d);
+    }
+    var byDay = {};
+    state.socialPosts.forEach(function (p) {
+      var d = new Date(p.scheduled_at);
+      var key = dayKey(d);
+      (byDay[key] = byDay[key] || []).push(p);
+    });
+
+    grid.innerHTML = days.map(function (d) {
+      var key = dayKey(d);
+      var posts = byDay[key] || [];
+      var dots = posts.map(function (p) {
+        var cls = p.status === "Published" ? "green" : (p.status === "Failed" ? "red" : "cyan");
+        return '<span class="dot ' + cls + '"></span>';
+      }).join("");
+      var selected = state.selectedDay === key ? " selected" : "";
+      return '<div class="cal-day' + selected + '" data-day="' + key + '">' +
+        '<div class="dow">' + d.toLocaleDateString("en-US", { weekday: "short" }) + '</div>' +
+        '<div class="dnum">' + d.getDate() + '</div>' +
+        '<div class="dots">' + dots + '</div>' +
+        '</div>';
+    }).join("");
+
+    $all("[data-day]", grid).forEach(function (el) {
+      el.addEventListener("click", function () {
+        state.selectedDay = el.dataset.day;
+        renderCalendar();
+        renderCalSide(byDay[el.dataset.day] || []);
+      });
+    });
+
+    if (state.selectedDay) renderCalSide(byDay[state.selectedDay] || []);
+  }
+
+  function renderCalSide(posts) {
+    var el = $("#cal-side");
+    if (!posts.length) { el.className = "panel empty"; el.innerHTML = "No posts scheduled for this day."; return; }
+    el.className = "panel";
+    el.innerHTML = "<h2>Posts for this day</h2>" + posts.map(function (p) {
+      return '<div class="post-row">' +
+        '<span class="platforms">' + p.platforms.map(platformChip).join("") + '</span>' +
+        '<span class="preview">' + esc(truncate(p.text, 60)) + '</span>' +
+        '<span class="when">' + esc(fmtDateTime(p.scheduled_at)) + '</span>' +
+        '<span class="post-status ' + esc(p.status) + '">' + esc(p.status) + '</span>' +
+        '</div>';
+    }).join("");
+  }
+
+  $all("[data-social-view]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      state.socialView = btn.dataset.socialView;
+      $all("[data-social-view]").forEach(function (b) { b.classList.toggle("active", b === btn); });
+      $("#social-list-view").style.display = state.socialView === "list" ? "" : "none";
+      $("#social-calendar-view").style.display = state.socialView === "calendar" ? "" : "none";
+    });
+  });
+
+  $("#add-post-btn").addEventListener("click", function () { $("#add-post-modal").classList.add("open"); });
+  $("#add-post-cancel").addEventListener("click", function () { $("#add-post-modal").classList.remove("open"); });
+  $("#add-post-submit").addEventListener("click", function () {
+    var platforms = $all('#add-post-modal input[type=checkbox]:checked').map(function (c) { return c.value; });
+    var content = $("#post-content").value.trim();
+    var when = $("#post-when").value;
+    if (!content) { toast("Content is required."); return; }
+    if (!platforms.length) { toast("Pick at least one platform."); return; }
+    if (!when) { toast("Pick a schedule date/time."); return; }
+    var scheduledIso = new Date(when).toISOString();
+    state.socialPosts.push({
+      id: "sp-local-" + Date.now(),
+      platforms: platforms,
+      text: content,
+      scheduled_at: scheduledIso,
+      status: "Scheduled",
+    });
+    $("#post-content").value = "";
+    $("#post-media").value = "";
+    $("#post-when").value = "";
+    $("#add-post-modal").classList.remove("open");
+    renderSocialList();
+    renderCalendar();
+    toast("Post scheduled.");
+  });
+
+  // ======================================================================
+  // ANALYTICS
+  // ======================================================================
+  function loadAnalytics() {
+    api("/analytics?range=" + encodeURIComponent(state.analyticsRange)).then(function (d) {
+      $("#an-leads").textContent = fmtNum(d.leads);
+      $("#an-calls").textContent = fmtNum(d.calls_booked);
+      $("#an-deals").textContent = fmtNum(d.deals_closed);
+      $("#an-revenue").textContent = fmtMoney(d.revenue);
+      renderBarChart("#chart-source", d.by_source || [], "source");
+      renderBarChart("#chart-agents", d.top_agents || [], "agent", "interactions");
+    }).catch(function () {});
+  }
+
+  function renderBarChart(sel, rows, labelKey, valueKey) {
+    valueKey = valueKey || "value";
+    var el = $(sel);
+    if (!rows.length) { el.innerHTML = '<div class="empty-state">No data.</div>'; return; }
+    var max = Math.max.apply(null, rows.map(function (r) { return r[valueKey]; })) || 1;
+    el.innerHTML = rows.map(function (r) {
+      var pct = Math.round((r[valueKey] / max) * 100);
+      return '<div class="bar-row">' +
+        '<span class="bar-label">' + esc(r[labelKey]) + '</span>' +
+        '<span class="bar-track"><span class="bar-fill" style="width:' + pct + '%"></span></span>' +
+        '<span class="bar-val">' + fmtNum(r[valueKey]) + '</span>' +
+        '</div>';
+    }).join("");
+  }
+
+  $all("#range-toggle button").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      state.analyticsRange = btn.dataset.range;
+      $all("#range-toggle button").forEach(function (b) { b.classList.toggle("active", b === btn); });
+      loadAnalytics();
+    });
+  });
+
+  // ---------- boot ----------
+  loadDashboard();
+})();
+</script>
+</body>
+</html>
