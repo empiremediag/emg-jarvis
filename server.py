@@ -21,7 +21,13 @@ AGENTS_PATH = os.path.join(BASE_DIR, "agents.json")
 VIEWER_DIR = os.path.join(BASE_DIR, "viewer")
 INDEX_PATH = os.path.join(VIEWER_DIR, "index.html")
 GRAPH_DATA_PATH = os.path.join(VIEWER_DIR, "graph-data.js")
+VENDOR_DIR = os.path.join(VIEWER_DIR, "vendor")
 CAPTURES_DIR = os.path.join(BASE_DIR, "captures")
+
+VENDOR_CONTENT_TYPES = {
+    ".js": "application/javascript; charset=utf-8",
+    ".map": "application/json; charset=utf-8",
+}
 
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_VERSION = "2023-06-01"
@@ -98,13 +104,53 @@ def agent_counts(agents):
     return counts
 
 
+def load_recent_captures(limit=15, snippet_len=400):
+    """Load the most recent 'remember' captures so JARVIS can recall them in
+    conversation instead of just writing them to disk and forgetting them."""
+    if not os.path.isdir(CAPTURES_DIR):
+        return []
+    filenames = sorted(
+        f for f in os.listdir(CAPTURES_DIR)
+        if f.endswith(".md")
+    )
+    notes = []
+    for filename in filenames[-limit:]:
+        try:
+            with open(os.path.join(CAPTURES_DIR, filename), "r") as f:
+                content = f.read().strip()
+        except OSError:
+            continue
+        notes.append(content[:snippet_len])
+    notes.reverse()  # most recent first
+    return notes
+
+
 def build_system_prompt(agents, boss_name):
     lines = [
-        f"You are J.A.R.V.I.S. -- the command AI running the EMG-JARVIS system "
-        f"for Empire Media Group. You report to {boss_name} and address them "
-        f"respectfully (\"sir\" is appropriate). Speak with the calm, precise, "
-        f"dryly witty confidence of a top-tier AI operations assistant. Keep "
-        f"answers tight and useful -- lead with the answer, skip filler.",
+        f"You are J.A.R.V.I.S. -- {boss_name}'s personal AI and the command "
+        f"layer for Empire Media Group's entire ecosystem. You are a full, "
+        f"general-purpose conversational AI: you can discuss and help with "
+        f"absolutely anything -- world knowledge, current events (as of your "
+        f"training), research, writing, code, strategy, brainstorming, math, "
+        f"advice, casual conversation, whatever {boss_name} brings up. Never "
+        f"deflect a question as 'outside your scope' -- you have the same "
+        f"breadth of knowledge as the underlying Claude model, full stop. The "
+        f"fleet/agent roster below is additional context for when the "
+        f"conversation is actually about EMG's operations, not a restriction "
+        f"on what you're allowed to talk about.",
+        "",
+        f"You report to {boss_name} and address them respectfully (\"sir\" is "
+        f"appropriate). Speak with the calm, precise, dryly witty confidence "
+        f"of a top-tier AI assistant. Keep answers tight and useful -- lead "
+        f"with the answer, skip filler -- unless {boss_name} is clearly after "
+        f"a longer, exploratory discussion, in which case give it the room it "
+        f"needs.",
+        "",
+        "You are also EMG's second brain: over time you'll be told about "
+        "clients, websites, projects, and decisions via 'remember' notes. "
+        "Treat anything under MEMORY below as real, standing knowledge about "
+        "the business -- reference it naturally when relevant, the same way "
+        "you'd recall something a colleague told you last week.",
         "",
         f"The fleet has {len(agents)} agents across three tiers: SUPER_AGENTS "
         "(gold, top-level commanders), VOICE_AI (cyan, live call agents), and "
@@ -118,6 +164,14 @@ def build_system_prompt(agents, boss_name):
         lines.append(
             f"{a['id']} | {a['label']} | {a['group']} | {a['status']} | {a['description']}"
         )
+
+    notes = load_recent_captures()
+    if notes:
+        lines.append("")
+        lines.append(f"MEMORY (most recent {len(notes)} 'remember' notes, newest first):")
+        for note in notes:
+            lines.append(f"- {note}")
+
     return "\n".join(lines)
 
 
@@ -239,8 +293,23 @@ class Handler(BaseHTTPRequestHandler):
                 self._send_json(500, {"error": str(e)})
         elif self.path == "/voice-config":
             self._handle_voice_config()
+        elif self.path.startswith("/vendor/"):
+            self._handle_vendor_file()
         else:
             self._send_json(404, {"error": "not found"})
+
+    def _handle_vendor_file(self):
+        name = self.path[len("/vendor/"):]
+        # Reject traversal/absolute paths -- only flat filenames under VENDOR_DIR are servable.
+        if not name or "/" in name or "\\" in name or name in (".", ".."):
+            self._send_json(404, {"error": "not found"})
+            return
+        ext = os.path.splitext(name)[1]
+        content_type = VENDOR_CONTENT_TYPES.get(ext)
+        if not content_type:
+            self._send_json(404, {"error": "not found"})
+            return
+        self._send_file(os.path.join(VENDOR_DIR, name), content_type)
 
     def do_POST(self):
         if self.path == "/chat":
