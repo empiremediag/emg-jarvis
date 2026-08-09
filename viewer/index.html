@@ -580,13 +580,17 @@
 <script type="importmap">
 {
   "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    "three": "/vendor/three.module.js"
   }
 }
 </script>
 <script type="module">
-import * as THREE from "three";
-import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+/* Three.js is loaded dynamically (see initThreeScene below), not via a
+   top-level static import. A static import that fails (blocked CDN, no
+   WebGL, etc.) would abort evaluation of this entire module -- including
+   the chat bar, mic, search and settings wiring below -- since ES modules
+   fail atomically. Dynamic import + try/catch keeps the 3D mesh optional
+   without risking the rest of the app. */
 
 /* ============================================================
    Constants
@@ -641,8 +645,52 @@ function setCurrentModel(modelId) {
 }
 
 /* ============================================================
-   Three.js scene
+   3D scene state -- safe no-op defaults, replaced by initThreeScene()
+   if/when Three.js successfully initializes. Every core UI feature
+   (chat, mic, search, settings, side panel) reads/calls these but must
+   keep working even if 3D never comes up.
    ============================================================ */
+var threeReady = false;
+var nodeMeshes = {};
+var highlighted = new Set();
+var selectNodeMesh = function () {};
+var flyToNode = function () {};
+var addNodeMesh = function () {};
+var rebuildLinks = function () {};
+
+function lightUpCluster(ids, focusFirst) {
+  highlighted = new Set(ids);
+  if (focusFirst && ids.length) {
+    var mesh = nodeMeshes[ids[0]];
+    if (mesh) flyToNode(mesh, 1200);
+  }
+  setTimeout(function () { highlighted = new Set(); }, 4000);
+}
+
+/* ============================================================
+   Three.js scene (optional -- everything above keeps working without it)
+   ============================================================ */
+async function initThreeScene() {
+  var THREE, OrbitControls;
+  try {
+    THREE = await import("three");
+    ({ OrbitControls } = await import("/vendor/OrbitControls.js"));
+  } catch (err) {
+    console.error("EMG-JARVIS: Three.js failed to load; running without the 3D mesh.", err);
+    return;
+  }
+
+  try {
+    buildThreeScene(THREE, OrbitControls);
+    threeReady = true;
+  } catch (err) {
+    console.error("EMG-JARVIS: 3D mesh failed to initialize; running without it.", err);
+    var graphEl = document.getElementById("graph");
+    if (graphEl) graphEl.style.background = "radial-gradient(ellipse at center, #14141c 0%, #05050a 100%)";
+  }
+}
+
+function buildThreeScene(THREE, OrbitControls) {
 var container = document.getElementById("graph");
 
 var scene = new THREE.Scene();
@@ -714,7 +762,6 @@ computeLayout(GRAPH.nodes);
 var meshGroup = new THREE.Group();
 scene.add(meshGroup);
 
-var nodeMeshes = {};
 var sphereGeomCache = {};
 function getSphereGeometry(radius) {
   var key = radius.toFixed(2);
@@ -725,7 +772,7 @@ function colorForGroup(group) {
   return GROUP_COLORS_HEX[group] !== undefined ? GROUP_COLORS_HEX[group] : 0x888888;
 }
 
-function addNodeMesh(node) {
+addNodeMesh = function (node) {
   var size = GROUP_SIZE[node.group] || 3;
   var color = colorForGroup(node.group);
   var material = new THREE.MeshStandardMaterial({
@@ -737,7 +784,7 @@ function addNodeMesh(node) {
   meshGroup.add(mesh);
   nodeMeshes[node.id] = mesh;
   return mesh;
-}
+};
 GRAPH.nodes.forEach(addNodeMesh);
 
 /* ---- Links (single LineSegments, rebuilt on graph change) ---- */
@@ -747,7 +794,7 @@ var linksMesh = new THREE.LineSegments(
 );
 meshGroup.add(linksMesh);
 
-function rebuildLinks() {
+rebuildLinks = function () {
   var positions = [];
   GRAPH.links.forEach(function (l) {
     var s = nodeMeshes[l.source], t = nodeMeshes[l.target];
@@ -758,18 +805,18 @@ function rebuildLinks() {
   var geom = new THREE.BufferGeometry();
   geom.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
   linksMesh.geometry = geom;
-}
+};
 rebuildLinks();
 
 /* ---- Selection + camera flight ---- */
 var selectedMesh = null;
-function selectNodeMesh(mesh) {
+selectNodeMesh = function (mesh) {
   if (selectedMesh && selectedMesh !== mesh) selectedMesh.scale.set(1, 1, 1);
   if (mesh) mesh.scale.set(1.4, 1.4, 1.4);
   selectedMesh = mesh;
-}
+};
 
-function flyToNode(mesh, ms) {
+flyToNode = function (mesh, ms) {
   if (!mesh) return;
   var duration = ms || 1000;
   var startTime = performance.now();
@@ -787,18 +834,7 @@ function flyToNode(mesh, ms) {
     if (t < 1) requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
-}
-
-/* ---- Highlight cluster (chat references) ---- */
-var highlighted = new Set();
-function lightUpCluster(ids, focusFirst) {
-  highlighted = new Set(ids);
-  if (focusFirst && ids.length) {
-    var mesh = nodeMeshes[ids[0]];
-    if (mesh) flyToNode(mesh, 1200);
-  }
-  setTimeout(function () { highlighted = new Set(); }, 4000);
-}
+};
 
 /* ---- Click detection (distinguish click from orbit-drag) ---- */
 var raycaster = new THREE.Raycaster();
@@ -855,6 +891,9 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
+}
+
+initThreeScene();
 
 /* ============================================================
    Status bar
@@ -1191,7 +1230,7 @@ function addGoldStarNode(label) {
   var newId = GRAPH.nodes.length ? Math.max.apply(null, GRAPH.nodes.map(function (n) { return n.id; })) + 1 : 0;
   var anchor = GRAPH.nodes.find(function (n) { return n.group === "SUPER_AGENTS"; });
   var anchorMesh = anchor ? nodeMeshes[anchor.id] : null;
-  var anchorPos = anchorMesh ? anchorMesh.position : new THREE.Vector3(0, 0, 0);
+  var anchorPos = anchorMesh ? anchorMesh.position : { x: 0, y: 0, z: 0 };
   var node = {
     id: newId,
     label: label,
