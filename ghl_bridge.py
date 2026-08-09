@@ -35,7 +35,7 @@ _CACHE = {"ts": 0, "appointments": [], "opportunities": [], "error": None}
 
 
 def load_config():
-    with open(CONFIG_PATH, "r") as f:
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
