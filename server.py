@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import time
+import traceback
 import urllib.request
 import urllib.error
 import urllib.parse
@@ -865,7 +866,12 @@ class Handler(BaseHTTPRequestHandler):
             nodes = find_referenced_nodes(answer, agents)
             self._send_json(200, {"answer": answer, "nodes": nodes, "model": active_model})
         except Exception as e:
-            self._send_json(500, {"error": str(e)})
+            sys.stderr.write("EMG-JARVIS: /chat handler crashed:\n")
+            traceback.print_exc(file=sys.stderr)
+            self._send_json(500, {
+                "error": str(e),
+                "answer": f"Something broke on the server side, sir: {e}",
+            })
 
     def _handle_remember(self):
         try:
