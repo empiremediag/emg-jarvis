@@ -12,6 +12,7 @@ import sys
 import time
 import urllib.request
 import urllib.error
+import urllib.parse
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -20,6 +21,7 @@ CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 AGENTS_PATH = os.path.join(BASE_DIR, "agents.json")
 VIEWER_DIR = os.path.join(BASE_DIR, "viewer")
 INDEX_PATH = os.path.join(VIEWER_DIR, "index.html")
+COMMAND_CENTER_PATH = os.path.join(VIEWER_DIR, "command-center.html")
 GRAPH_DATA_PATH = os.path.join(VIEWER_DIR, "graph-data.js")
 VENDOR_DIR = os.path.join(VIEWER_DIR, "vendor")
 CAPTURES_DIR = os.path.join(BASE_DIR, "captures")
@@ -62,6 +64,259 @@ ELEVENLABS_VOICES = [
     {"id": "oWAxZDx7w5VEj9dCyTzz", "name": "Grace", "gender": "female", "style": "southern"},
     {"id": "ThT5KcBeYPX3keUQqHPh", "name": "Dorothy", "gender": "female", "style": "British"},
 ]
+
+# ---------------------------------------------------------------------------
+# Command Center mock/stub data.
+#
+# All of this is in-memory, structured to mirror the shape a real GoHighLevel
+# (or internal render-queue) integration would return, so the HTTP handlers
+# below can be pointed at live data later without changing the response
+# shape the frontend expects.
+# ---------------------------------------------------------------------------
+
+CONTENT_JOBS = [
+    {
+        "id": "job-video4", "title": "VIDEO4 Content Studio", "status": "Generating",
+        "model": "Seedance 2.0 720p", "clips_done": 1, "clips_total": 3,
+        "credits_used": 420, "started_at": "2026-08-09T13:05:00Z", "agent": "CONTENT STUDIO ORCHESTRATOR",
+    },
+    {
+        "id": "job-video5", "title": "VIDEO5 Pricing Reveal", "status": "Queued",
+        "model": "Seedance 2.0 720p", "clips_done": 0, "clips_total": 2,
+        "credits_used": 0, "started_at": "2026-08-09T13:40:00Z", "agent": "EMPIRE VIDEO COMMANDER",
+    },
+    {
+        "id": "job-video6", "title": "VIDEO6 Founder Story", "status": "Processing",
+        "model": "Seedance 2.0 720p", "clips_done": 2, "clips_total": 3,
+        "credits_used": 810, "started_at": "2026-08-09T12:20:00Z", "agent": "EMPIRE VIDEO COMMANDER",
+    },
+    {
+        "id": "job-video7", "title": "VIDEO7 Results/Proof", "status": "Complete",
+        "model": "Seedance 2.0 720p", "clips_done": 3, "clips_total": 3,
+        "credits_used": 1150, "started_at": "2026-08-09T10:15:00Z", "agent": "CONTENT STUDIO ORCHESTRATOR",
+    },
+    {
+        "id": "job-video8", "title": "VIDEO8 Booking CTA", "status": "Queued",
+        "model": "Seedance 2.0 720p", "clips_done": 0, "clips_total": 1,
+        "credits_used": 0, "started_at": "2026-08-09T13:55:00Z", "agent": "EMPIRE VIDEO COMMANDER",
+    },
+]
+
+CONTENT_QUEUE = [
+    {
+        "id": "cq-1", "title": "VIDEO7 Results/Proof -- final cut", "type": "Video",
+        "created_at": "2026-08-09T10:40:00Z", "thumbnail_url": "", "status": "pending_review",
+    },
+    {
+        "id": "cq-2", "title": "Founder Story -- carousel graphics", "type": "Image",
+        "created_at": "2026-08-09T11:05:00Z", "thumbnail_url": "", "status": "pending_review",
+    },
+    {
+        "id": "cq-3", "title": "Booking CTA -- IG caption copy", "type": "Copy",
+        "created_at": "2026-08-09T11:30:00Z", "thumbnail_url": "", "status": "pending_review",
+    },
+    {
+        "id": "cq-4", "title": "Pricing Reveal -- teaser clip", "type": "Video",
+        "created_at": "2026-08-09T12:00:00Z", "thumbnail_url": "", "status": "pending_review",
+    },
+]
+
+# agent label -> ISO killed_at timestamp (or absent if running)
+AGENT_KILL_STATE = {}
+
+ADS_DATA = [
+    {
+        "id": "ad-1", "platform": "facebook", "ad_name": "Pricing Reveal -- Retarget",
+        "status": "active", "impressions": 48210, "clicks": 1120, "spend": 812.40,
+        "leads": 64, "last_updated": "2026-08-09T13:50:00Z",
+    },
+    {
+        "id": "ad-2", "platform": "instagram", "ad_name": "Founder Story -- Cold Traffic",
+        "status": "active", "impressions": 92040, "clicks": 2310, "spend": 1540.10,
+        "leads": 118, "last_updated": "2026-08-09T13:45:00Z",
+    },
+    {
+        "id": "ad-3", "platform": "tiktok", "ad_name": "Results/Proof -- Spark Ad",
+        "status": "active", "impressions": 156300, "clicks": 5870, "spend": 2210.75,
+        "leads": 201, "last_updated": "2026-08-09T13:55:00Z",
+    },
+    {
+        "id": "ad-4", "platform": "linkedin", "ad_name": "Booking CTA -- B2B Decision Makers",
+        "status": "paused", "impressions": 12040, "clicks": 210, "spend": 640.00,
+        "leads": 9, "last_updated": "2026-08-09T09:10:00Z",
+    },
+    {
+        "id": "ad-5", "platform": "facebook", "ad_name": "Content Studio -- Lookalike 1%",
+        "status": "active", "impressions": 33110, "clicks": 940, "spend": 505.60,
+        "leads": 41, "last_updated": "2026-08-09T13:20:00Z",
+    },
+]
+
+KEYWORD_LOG = [
+    {
+        "time": "2026-08-09T13:58:00Z", "keyword": "price", "platform": "Facebook",
+        "snippet": "How much does this cost? Do you have a starter plan or...",
+        "agent": "AD COMMANDER", "action": "Sent DM with booking link", "status": "Sent",
+    },
+    {
+        "time": "2026-08-09T13:42:00Z", "keyword": "demo", "platform": "Instagram",
+        "snippet": "can I get a demo of this before I commit to anything",
+        "agent": "REVIEW COMMANDER", "action": "Replied with demo offer", "status": "Sent",
+    },
+    {
+        "time": "2026-08-09T13:15:00Z", "keyword": "interested", "platform": "Facebook",
+        "snippet": "Interested! Been looking for something like this for my biz",
+        "agent": "SOCIAL PLANNER", "action": "Added to pipeline Stage 2", "status": "Sent",
+    },
+    {
+        "time": "2026-08-09T12:50:00Z", "keyword": "how it works", "platform": "Instagram",
+        "snippet": "not sure how this actually works for a local service biz",
+        "agent": "LEAD-BOT", "action": "Sent explainer video + FAQ link", "status": "Sent",
+    },
+    {
+        "time": "2026-08-09T12:30:00Z", "keyword": "book a call", "platform": "Facebook",
+        "snippet": "yes please book a call for me whenever you have space",
+        "agent": "SCHEDULE-BOT", "action": "Booked into calendar, confirmation sent", "status": "Sent",
+    },
+    {
+        "time": "2026-08-09T11:58:00Z", "keyword": "pricing", "platform": "TikTok",
+        "snippet": "pricing?? need this asap for my launch next month",
+        "agent": "AD COMMANDER", "action": "Sent DM with booking link", "status": "Pending",
+    },
+]
+
+SOCIAL_POSTS = [
+    {
+        "id": "sp-1", "platforms": ["facebook", "instagram"], "text": "Founder Story is live -- the real reason we built this.",
+        "scheduled_at": "2026-08-09T16:00:00Z", "status": "Scheduled",
+    },
+    {
+        "id": "sp-2", "platforms": ["tiktok"], "text": "Results/Proof clip -- 3 client wins in 60 seconds.",
+        "scheduled_at": "2026-08-09T18:30:00Z", "status": "Scheduled",
+    },
+    {
+        "id": "sp-3", "platforms": ["linkedin"], "text": "Booking CTA -- how B2B teams are using this to fill calendars.",
+        "scheduled_at": "2026-08-10T14:00:00Z", "status": "Scheduled",
+    },
+    {
+        "id": "sp-4", "platforms": ["instagram", "facebook", "tiktok"], "text": "Pricing Reveal teaser -- link in bio for the full breakdown.",
+        "scheduled_at": "2026-08-08T17:00:00Z", "status": "Published",
+    },
+    {
+        "id": "sp-5", "platforms": ["facebook"], "text": "Behind the scenes at Content Studio -- how a VIDEO job gets made.",
+        "scheduled_at": "2026-08-08T12:00:00Z", "status": "Published",
+    },
+    {
+        "id": "sp-6", "platforms": ["youtube"], "text": "Full walkthrough: from lead to booked call in under 5 minutes.",
+        "scheduled_at": "2026-08-07T20:00:00Z", "status": "Failed",
+    },
+]
+
+ACTIVITY_LOG = [
+    {"offset_s": 20, "agent": "COMMAND Orchestrator", "action": "Routed inbound lead to INTAKE COMMANDER", "status": "ok"},
+    {"offset_s": 95, "agent": "AD COMMANDER", "action": "Paused underperforming ad ad-4 (LinkedIn, CTR 1.7%)", "status": "ok"},
+    {"offset_s": 180, "agent": "EMPIRE VIDEO COMMANDER", "action": "Started render for VIDEO6 Founder Story, clip 2 of 3", "status": "ok"},
+    {"offset_s": 260, "agent": "LEAD-BOT", "action": "Replied to Instagram comment with demo offer", "status": "ok"},
+    {"offset_s": 340, "agent": "CLOSE COMMANDER", "action": "Generated contract for closed deal #4821", "status": "ok"},
+    {"offset_s": 430, "agent": "SCHEDULE-BOT", "action": "Booked discovery call for Thursday 2:00 PM", "status": "ok"},
+    {"offset_s": 510, "agent": "ORACLE BI", "action": "Refreshed revenue dashboard -- 7-day rollup", "status": "ok"},
+    {"offset_s": 600, "agent": "REVIEW COMMANDER", "action": "Flagged 1-star review for manual response", "status": "warn"},
+    {"offset_s": 700, "agent": "SOCIAL PLANNER", "action": "Queued 3 posts for tomorrow's content calendar", "status": "ok"},
+    {"offset_s": 810, "agent": "CONTENT STUDIO ORCHESTRATOR", "action": "VIDEO7 Results/Proof marked Complete", "status": "ok"},
+]
+
+
+def _iso(dt):
+    return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def get_activity_events():
+    now = datetime.now(timezone.utc)
+    events = []
+    for e in ACTIVITY_LOG:
+        ts = now.timestamp() - e["offset_s"]
+        events.append({
+            "time": _iso(datetime.fromtimestamp(ts, tz=timezone.utc)),
+            "agent": e["agent"],
+            "action": e["action"],
+            "status": e["status"],
+        })
+    return events
+
+
+def get_agents_with_kill_state():
+    agents = load_agents()
+    out = []
+    for a in agents:
+        killed_at = AGENT_KILL_STATE.get(a["label"])
+        status = "killed" if killed_at else a.get("status", "offline")
+        out.append({
+            "name": a["label"],
+            "group": a["group"],
+            "type": a.get("type", ""),
+            "status": status,
+            "tools": a.get("tools", 0),
+            "description": a.get("description", ""),
+            "killed_at": killed_at,
+        })
+    return out
+
+
+def compute_ads_summary(ads):
+    active = sum(1 for ad in ads if ad["status"] == "active")
+    impressions = sum(ad["impressions"] for ad in ads)
+    clicks = sum(ad["clicks"] for ad in ads)
+    spend = sum(ad["spend"] for ad in ads)
+    leads = sum(ad["leads"] for ad in ads)
+    ctr = round((clicks / impressions) * 100, 2) if impressions else 0.0
+    return {
+        "active": active, "impressions": impressions, "clicks": clicks,
+        "ctr": ctr, "spend": round(spend, 2), "leads": leads,
+    }
+
+
+ANALYTICS_RANGE_FACTORS = {"today": 0.12, "7d": 1.0, "30d": 3.8, "all": 11.5}
+
+ANALYTICS_BASE = {
+    "leads": 434,
+    "calls_booked": 118,
+    "deals_closed": 37,
+    "revenue": 96400,
+    "by_source": [
+        {"source": "Ads", "value": 210},
+        {"source": "Voice AI", "value": 96},
+        {"source": "Organic", "value": 74},
+        {"source": "Referral", "value": 38},
+        {"source": "Direct", "value": 16},
+    ],
+    "top_agents": [
+        {"agent": "AD COMMANDER", "interactions": 812},
+        {"agent": "LEAD-BOT", "interactions": 690},
+        {"agent": "SCHEDULE-BOT", "interactions": 544},
+        {"agent": "REVIEW COMMANDER", "interactions": 401},
+        {"agent": "SOCIAL PLANNER", "interactions": 355},
+    ],
+}
+
+
+def build_analytics(range_key):
+    factor = ANALYTICS_RANGE_FACTORS.get(range_key, 1.0)
+    return {
+        "range": range_key,
+        "leads": round(ANALYTICS_BASE["leads"] * factor),
+        "calls_booked": round(ANALYTICS_BASE["calls_booked"] * factor),
+        "deals_closed": round(ANALYTICS_BASE["deals_closed"] * factor),
+        "revenue": round(ANALYTICS_BASE["revenue"] * factor),
+        "by_source": [
+            {"source": s["source"], "value": round(s["value"] * factor)}
+            for s in ANALYTICS_BASE["by_source"]
+        ],
+        "top_agents": [
+            {"agent": a["agent"], "interactions": round(a["interactions"] * factor)}
+            for a in ANALYTICS_BASE["top_agents"]
+        ],
+    }
+
 
 # session_id -> list of {"role": "user"|"assistant", "content": str}
 SESSIONS = {}
@@ -316,22 +571,56 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        if self.path in ("/", "/index.html"):
+        path = self.path.split("?", 1)[0]
+        if path in ("/", "/index.html"):
             self._send_file(INDEX_PATH, "text/html; charset=utf-8")
-        elif self.path == "/graph-data.js":
+        elif path in ("/command-center", "/command-center.html"):
+            self._send_file(COMMAND_CENTER_PATH, "text/html; charset=utf-8")
+        elif path == "/graph-data.js":
             self._send_file(GRAPH_DATA_PATH, "application/javascript; charset=utf-8")
-        elif self.path == "/status":
+        elif path == "/status":
             try:
                 agents = load_agents()
                 self._send_json(200, agent_counts(agents))
             except Exception as e:
                 self._send_json(500, {"error": str(e)})
-        elif self.path == "/voices":
+        elif path == "/status/agents":
+            try:
+                self._send_json(200, get_agents_with_kill_state())
+            except Exception as e:
+                self._send_json(500, {"error": str(e)})
+        elif path == "/voices":
             self._handle_voices()
-        elif self.path.startswith("/vendor/"):
+        elif path == "/content/status":
+            self._send_json(200, {"jobs": CONTENT_JOBS})
+        elif path == "/content/queue":
+            self._send_json(200, {"items": CONTENT_QUEUE})
+        elif path == "/ads/tracker":
+            self._send_json(200, {
+                "ads": ADS_DATA,
+                "summary": compute_ads_summary(ADS_DATA),
+                "keyword_log": KEYWORD_LOG,
+            })
+        elif path == "/social/schedule":
+            self._send_json(200, {"posts": SOCIAL_POSTS})
+        elif path == "/analytics":
+            range_key = self._query_param("range", "7d")
+            self._send_json(200, build_analytics(range_key))
+        elif path == "/activity":
+            self._send_json(200, {"events": get_activity_events()})
+        elif path.startswith("/vendor/"):
             self._handle_vendor_file()
         else:
             self._send_json(404, {"error": "not found"})
+
+    def _query_param(self, key, default=None):
+        query = self.path.split("?", 1)[1] if "?" in self.path else ""
+        for part in query.split("&"):
+            if "=" in part:
+                k, v = part.split("=", 1)
+                if k == key:
+                    return urllib.parse.unquote(v)
+        return default
 
     def _handle_vendor_file(self):
         name = self.path[len("/vendor/"):]
@@ -353,8 +642,105 @@ class Handler(BaseHTTPRequestHandler):
             self._handle_remember()
         elif self.path == "/speak":
             self._handle_speak()
+        elif self.path == "/content/kill":
+            self._handle_content_kill()
+        elif self.path == "/content/approve":
+            self._handle_content_review("approved")
+        elif self.path == "/content/reject":
+            self._handle_content_review("rejected")
+        elif self.path == "/agent/kill":
+            self._handle_agent_kill()
+        elif self.path == "/agent/resume":
+            self._handle_agent_resume()
+        elif self.path == "/agent/kill-all":
+            self._handle_agent_kill_all()
+        elif self.path == "/agent/resume-all":
+            self._handle_agent_resume_all()
         else:
             self._send_json(404, {"error": "not found"})
+
+    def _handle_content_kill(self):
+        try:
+            body = self._read_json_body()
+            job_id = (body.get("job_id") or "").strip()
+            if not job_id:
+                self._send_json(400, {"error": "job_id is required"})
+                return
+            found = False
+            for job in CONTENT_JOBS:
+                if job["id"] == job_id:
+                    job["status"] = "Failed"
+                    found = True
+                    break
+            if not found:
+                self._send_json(404, {"error": f"no job with id {job_id}"})
+                return
+            self._send_json(200, {"ok": True})
+        except Exception as e:
+            self._send_json(500, {"error": str(e)})
+
+    def _handle_content_review(self, new_status):
+        try:
+            body = self._read_json_body()
+            item_id = (body.get("id") or "").strip()
+            if not item_id:
+                self._send_json(400, {"error": "id is required"})
+                return
+            found = False
+            for item in CONTENT_QUEUE:
+                if item["id"] == item_id:
+                    item["status"] = new_status
+                    found = True
+                    break
+            if not found:
+                self._send_json(404, {"error": f"no queue item with id {item_id}"})
+                return
+            self._send_json(200, {"ok": True})
+        except Exception as e:
+            self._send_json(500, {"error": str(e)})
+
+    def _handle_agent_kill(self):
+        try:
+            body = self._read_json_body()
+            name = (body.get("name") or "").strip()
+            if not name:
+                self._send_json(400, {"error": "name is required"})
+                return
+            killed_at = _iso(datetime.now(timezone.utc))
+            AGENT_KILL_STATE[name] = killed_at
+            self._send_json(200, {"ok": True, "killed_at": killed_at})
+        except Exception as e:
+            self._send_json(500, {"error": str(e)})
+
+    def _handle_agent_resume(self):
+        try:
+            body = self._read_json_body()
+            name = (body.get("name") or "").strip()
+            if not name:
+                self._send_json(400, {"error": "name is required"})
+                return
+            AGENT_KILL_STATE.pop(name, None)
+            self._send_json(200, {"ok": True})
+        except Exception as e:
+            self._send_json(500, {"error": str(e)})
+
+    def _handle_agent_kill_all(self):
+        try:
+            agents = load_agents()
+            killed_at = _iso(datetime.now(timezone.utc))
+            for a in agents:
+                AGENT_KILL_STATE[a["label"]] = killed_at
+            self._send_json(200, {"ok": True, "count": len(agents)})
+        except Exception as e:
+            self._send_json(500, {"error": str(e)})
+
+    def _handle_agent_resume_all(self):
+        try:
+            count = len(AGENT_KILL_STATE)
+            AGENT_KILL_STATE.clear()
+            self._send_json(200, {"ok": True, "count": count})
+        except Exception as e:
+            self._send_json(500, {"error": str(e)})
 
     def _handle_voices(self):
         try:
