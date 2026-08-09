@@ -14,7 +14,7 @@ import traceback
 import urllib.request
 import urllib.error
 import urllib.parse
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -186,63 +186,8 @@ KEYWORD_LOG = [
     },
 ]
 
-SOCIAL_POSTS = [
-    {
-        "id": "sp-1", "platforms": ["facebook", "instagram"], "text": "Founder Story is live -- the real reason we built this.",
-        "scheduled_at": "2026-08-09T16:00:00Z", "status": "Scheduled",
-    },
-    {
-        "id": "sp-2", "platforms": ["tiktok"], "text": "Results/Proof clip -- 3 client wins in 60 seconds.",
-        "scheduled_at": "2026-08-09T18:30:00Z", "status": "Scheduled",
-    },
-    {
-        "id": "sp-3", "platforms": ["linkedin"], "text": "Booking CTA -- how B2B teams are using this to fill calendars.",
-        "scheduled_at": "2026-08-10T14:00:00Z", "status": "Scheduled",
-    },
-    {
-        "id": "sp-4", "platforms": ["instagram", "facebook", "tiktok"], "text": "Pricing Reveal teaser -- link in bio for the full breakdown.",
-        "scheduled_at": "2026-08-08T17:00:00Z", "status": "Published",
-    },
-    {
-        "id": "sp-5", "platforms": ["facebook"], "text": "Behind the scenes at Content Studio -- how a VIDEO job gets made.",
-        "scheduled_at": "2026-08-08T12:00:00Z", "status": "Published",
-    },
-    {
-        "id": "sp-6", "platforms": ["youtube"], "text": "Full walkthrough: from lead to booked call in under 5 minutes.",
-        "scheduled_at": "2026-08-07T20:00:00Z", "status": "Failed",
-    },
-]
-
-ACTIVITY_LOG = [
-    {"offset_s": 20, "agent": "COMMAND Orchestrator", "action": "Routed inbound lead to INTAKE COMMANDER", "status": "ok"},
-    {"offset_s": 95, "agent": "AD COMMANDER", "action": "Paused underperforming ad ad-4 (LinkedIn, CTR 1.7%)", "status": "ok"},
-    {"offset_s": 180, "agent": "EMPIRE VIDEO COMMANDER", "action": "Started render for VIDEO6 Founder Story, clip 2 of 3", "status": "ok"},
-    {"offset_s": 260, "agent": "LEAD-BOT", "action": "Replied to Instagram comment with demo offer", "status": "ok"},
-    {"offset_s": 340, "agent": "CLOSE COMMANDER", "action": "Generated contract for closed deal #4821", "status": "ok"},
-    {"offset_s": 430, "agent": "SCHEDULE-BOT", "action": "Booked discovery call for Thursday 2:00 PM", "status": "ok"},
-    {"offset_s": 510, "agent": "ORACLE BI", "action": "Refreshed revenue dashboard -- 7-day rollup", "status": "ok"},
-    {"offset_s": 600, "agent": "REVIEW COMMANDER", "action": "Flagged 1-star review for manual response", "status": "warn"},
-    {"offset_s": 700, "agent": "SOCIAL PLANNER", "action": "Queued 3 posts for tomorrow's content calendar", "status": "ok"},
-    {"offset_s": 810, "agent": "CONTENT STUDIO ORCHESTRATOR", "action": "VIDEO7 Results/Proof marked Complete", "status": "ok"},
-]
-
-
 def _iso(dt):
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def get_activity_events():
-    now = datetime.now(timezone.utc)
-    events = []
-    for e in ACTIVITY_LOG:
-        ts = now.timestamp() - e["offset_s"]
-        events.append({
-            "time": _iso(datetime.fromtimestamp(ts, tz=timezone.utc)),
-            "agent": e["agent"],
-            "action": e["action"],
-            "status": e["status"],
-        })
-    return events
 
 
 def get_agents_with_kill_state():
@@ -276,47 +221,255 @@ def compute_ads_summary(ads):
     }
 
 
-ANALYTICS_RANGE_FACTORS = {"today": 0.12, "7d": 1.0, "30d": 3.8, "all": 11.5}
+# ---------------------------------------------------------------------------
+# GoHighLevel live data bridge for the Command Center.
+#
+# Same request/cache pattern as ghl_bridge.py: a Private Integration Token
+# in config.json, a "Version" header GHL requires on every call, and a
+# short-lived cache per GHL call so a burst of frontend polling doesn't
+# hammer the API. On failure, callers get back the last good cached value
+# (if any) plus the error, so the UI can show stale-but-present data with
+# an error flag instead of going blank.
+# ---------------------------------------------------------------------------
 
-ANALYTICS_BASE = {
-    "leads": 434,
-    "calls_booked": 118,
-    "deals_closed": 37,
-    "revenue": 96400,
-    "by_source": [
-        {"source": "Ads", "value": 210},
-        {"source": "Voice AI", "value": 96},
-        {"source": "Organic", "value": 74},
-        {"source": "Referral", "value": 38},
-        {"source": "Direct", "value": 16},
-    ],
-    "top_agents": [
-        {"agent": "AD COMMANDER", "interactions": 812},
-        {"agent": "LEAD-BOT", "interactions": 690},
-        {"agent": "SCHEDULE-BOT", "interactions": 544},
-        {"agent": "REVIEW COMMANDER", "interactions": 401},
-        {"agent": "SOCIAL PLANNER", "interactions": 355},
-    ],
-}
+GHL_API_BASE = "https://services.leadconnectorhq.com"
+GHL_API_VERSION = "2021-07-28"
+GHL_CACHE_TTL = 30  # seconds
+
+_GHL_CACHE = {}  # cache_key -> {"ts": float, "data": obj}
 
 
-def build_analytics(range_key):
-    factor = ANALYTICS_RANGE_FACTORS.get(range_key, 1.0)
-    return {
-        "range": range_key,
-        "leads": round(ANALYTICS_BASE["leads"] * factor),
-        "calls_booked": round(ANALYTICS_BASE["calls_booked"] * factor),
-        "deals_closed": round(ANALYTICS_BASE["deals_closed"] * factor),
-        "revenue": round(ANALYTICS_BASE["revenue"] * factor),
-        "by_source": [
-            {"source": s["source"], "value": round(s["value"] * factor)}
-            for s in ANALYTICS_BASE["by_source"]
-        ],
-        "top_agents": [
-            {"agent": a["agent"], "interactions": round(a["interactions"] * factor)}
-            for a in ANALYTICS_BASE["top_agents"]
-        ],
+def ghl_configured(config):
+    token = (config.get("ghl_token") or "").strip()
+    location_id = (config.get("ghl_location_id") or "").strip()
+    return bool(token) and bool(location_id)
+
+
+def ghl_request(config, path, query=None):
+    token = config["ghl_token"].strip()
+    url = f"{GHL_API_BASE}{path}"
+    if query:
+        url += "?" + urllib.parse.urlencode(query)
+    req = urllib.request.Request(
+        url,
+        method="GET",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Version": GHL_API_VERSION,
+            "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0 (compatible; EMG-JARVIS-CommandCenter/1.0)",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def ghl_cached(cache_key, fetch_fn, ttl=GHL_CACHE_TTL):
+    """Call fetch_fn(), caching successes under cache_key. On failure, fall
+    back to the last cached value (if any) so a transient GHL outage doesn't
+    blank the UI. Returns (data, error, stale)."""
+    now = time.time()
+    cached = _GHL_CACHE.get(cache_key)
+    if cached and (now - cached["ts"]) < ttl:
+        return cached["data"], None, False
+    try:
+        data = fetch_fn()
+        _GHL_CACHE[cache_key] = {"ts": now, "data": data}
+        return data, None, False
+    except Exception as e:
+        error = str(e)
+        if cached:
+            return cached["data"], error, True
+        return None, error, True
+
+
+def _not_configured_response(extra=None):
+    body = {
+        "configured": False,
+        "error": "GHL is not configured: set ghl_token and ghl_location_id in config.json.",
     }
+    if extra:
+        body.update(extra)
+    return body
+
+
+def _fetch_contacts_page(config, limit=100):
+    location_id = config["ghl_location_id"].strip()
+    return ghl_request(config, "/contacts/", {"locationId": location_id, "limit": limit})
+
+
+def _fetch_open_opportunities(config):
+    location_id = config["ghl_location_id"].strip()
+    return ghl_request(config, "/opportunities/search", {
+        "location_id": location_id, "status": "open", "limit": 1,
+    })
+
+
+def _fetch_week_calendar_events(config):
+    # GHL's /calendars/events requires one of calendarId/userId/groupId --
+    # locationId alone 422s (see ghl_bridge.py) -- so pull the location's
+    # calendars first and aggregate events per-calendar.
+    location_id = config["ghl_location_id"].strip()
+    now = datetime.now(timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_end = today_start + timedelta(days=7)
+    start_ms = int(today_start.timestamp() * 1000)
+    end_ms = int(week_end.timestamp() * 1000)
+
+    events = []
+    calendars = ghl_request(config, "/calendars/", {"locationId": location_id})
+    for cal in calendars.get("calendars", []):
+        cal_id = cal.get("id")
+        if not cal_id:
+            continue
+        try:
+            resp = ghl_request(config, "/calendars/events", {
+                "locationId": location_id, "calendarId": cal_id,
+                "startTime": start_ms, "endTime": end_ms,
+            })
+        except urllib.error.HTTPError:
+            continue
+        events.extend(resp.get("events", resp.get("appointments", [])))
+    return {"events": events}
+
+
+def build_stats(config):
+    if not ghl_configured(config):
+        return _not_configured_response({
+            "total_contacts": 0, "new_leads_today": 0,
+            "bookings_this_week": 0, "open_opportunities": 0,
+        })
+
+    contacts, contacts_err, _ = ghl_cached("stats_contacts", lambda: _fetch_contacts_page(config))
+    opps, opps_err, _ = ghl_cached("stats_open_opps", lambda: _fetch_open_opportunities(config))
+    events, events_err, _ = ghl_cached("stats_week_events", lambda: _fetch_week_calendar_events(config))
+
+    total_contacts = 0
+    new_leads_today = 0
+    if contacts:
+        meta = contacts.get("meta") or {}
+        total_contacts = meta.get("total", len(contacts.get("contacts", [])))
+        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        for c in contacts.get("contacts", []):
+            added = c.get("dateAdded") or ""
+            if added.startswith(today_str):
+                new_leads_today += 1
+
+    open_opportunities = 0
+    if opps:
+        meta = opps.get("meta") or {}
+        open_opportunities = meta.get("total", len(opps.get("opportunities", [])))
+
+    bookings_this_week = 0
+    if events:
+        bookings_this_week = len(events.get("events", events.get("appointments", [])))
+
+    error = contacts_err or opps_err or events_err
+    return {
+        "configured": True,
+        "error": error,
+        "total_contacts": total_contacts,
+        "new_leads_today": new_leads_today,
+        "bookings_this_week": bookings_this_week,
+        "open_opportunities": open_opportunities,
+    }
+
+
+def build_analytics_live(config):
+    if not ghl_configured(config):
+        return _not_configured_response({"leads_by_source": [], "daily_leads": []})
+
+    contacts, error, _ = ghl_cached("stats_contacts", lambda: _fetch_contacts_page(config))
+    contact_list = (contacts or {}).get("contacts", [])
+
+    source_counts = {}
+    for c in contact_list:
+        source = (c.get("source") or "Unknown").strip() or "Unknown"
+        source_counts[source] = source_counts.get(source, 0) + 1
+    leads_by_source = [
+        {"source": src, "value": count}
+        for src, count in sorted(source_counts.items(), key=lambda kv: -kv[1])
+    ][:8]
+
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    day_buckets = {(today - timedelta(days=i)).strftime("%Y-%m-%d"): 0 for i in range(6, -1, -1)}
+    for c in contact_list:
+        added = (c.get("dateAdded") or "")[:10]
+        if added in day_buckets:
+            day_buckets[added] += 1
+    daily_leads = [{"date": d, "value": v} for d, v in sorted(day_buckets.items())]
+
+    return {
+        "configured": True,
+        "error": error,
+        "leads_by_source": leads_by_source,
+        "daily_leads": daily_leads,
+    }
+
+
+def _normalize_ghl_post(post):
+    platforms = post.get("platforms")
+    if not platforms:
+        single = post.get("platform") or post.get("type") or ""
+        platforms = [single] if single else []
+    platforms = [str(p).lower() for p in platforms if p]
+
+    text = post.get("summary") or post.get("content") or post.get("body") or ""
+    scheduled_at = post.get("scheduleDate") or post.get("scheduledDate") or post.get("createdAt") or ""
+    status = str(post.get("status") or "scheduled").strip().capitalize()
+
+    return {
+        "id": post.get("id") or post.get("_id") or "",
+        "platforms": platforms,
+        "text": text,
+        "scheduled_at": scheduled_at,
+        "status": status,
+    }
+
+
+def build_social_live(config):
+    if not ghl_configured(config):
+        return _not_configured_response({"posts": []})
+
+    location_id = config["ghl_location_id"].strip()
+
+    def fetch():
+        return ghl_request(config, f"/social-media-posting/{location_id}/posts", {"skip": 0, "limit": 20})
+
+    raw, error, _ = ghl_cached("social_posts", fetch)
+    raw_posts = []
+    if isinstance(raw, dict):
+        raw_posts = raw.get("posts") or raw.get("data") or []
+    elif isinstance(raw, list):
+        raw_posts = raw
+
+    posts = [_normalize_ghl_post(p) for p in raw_posts]
+    return {"configured": True, "error": error, "posts": posts}
+
+
+def _normalize_ghl_conversation(conv):
+    agent = conv.get("fullName") or conv.get("contactName") or conv.get("email") or conv.get("phone") or "Unknown contact"
+    body = (conv.get("lastMessageBody") or "").strip()
+    conv_type = conv.get("type") or conv.get("lastMessageType") or "conversation"
+    action = body if body else f"New {conv_type} activity"
+    time_val = conv.get("lastMessageDate") or conv.get("dateAdded") or ""
+    status = "warn" if conv.get("unreadCount", 0) else "ok"
+    return {"time": time_val, "agent": agent, "action": action, "status": status}
+
+
+def build_conversations_live(config):
+    if not ghl_configured(config):
+        return _not_configured_response({"conversations": []})
+
+    location_id = config["ghl_location_id"].strip()
+
+    def fetch():
+        return ghl_request(config, "/conversations/", {"locationId": location_id, "limit": 10})
+
+    raw, error, _ = ghl_cached("conversations", fetch)
+    raw_convos = (raw or {}).get("conversations", [])
+    conversations = [_normalize_ghl_conversation(c) for c in raw_convos]
+    return {"configured": True, "error": error, "conversations": conversations}
 
 
 # session_id -> list of {"role": "user"|"assistant", "content": str}
@@ -602,26 +755,35 @@ class Handler(BaseHTTPRequestHandler):
                 "summary": compute_ads_summary(ADS_DATA),
                 "keyword_log": KEYWORD_LOG,
             })
-        elif path == "/social/schedule":
-            self._send_json(200, {"posts": SOCIAL_POSTS})
-        elif path == "/analytics":
-            range_key = self._query_param("range", "7d")
-            self._send_json(200, build_analytics(range_key))
-        elif path == "/activity":
-            self._send_json(200, {"events": get_activity_events()})
+        elif path == "/api/stats":
+            try:
+                self._send_json(200, build_stats(load_config()))
+            except Exception as e:
+                self._send_json(500, {"error": str(e)})
+        elif path == "/api/agents":
+            try:
+                self._send_json(200, {"agents": get_agents_with_kill_state()})
+            except Exception as e:
+                self._send_json(500, {"error": str(e)})
+        elif path == "/api/analytics":
+            try:
+                self._send_json(200, build_analytics_live(load_config()))
+            except Exception as e:
+                self._send_json(500, {"error": str(e)})
+        elif path == "/api/social":
+            try:
+                self._send_json(200, build_social_live(load_config()))
+            except Exception as e:
+                self._send_json(500, {"error": str(e)})
+        elif path == "/api/conversations":
+            try:
+                self._send_json(200, build_conversations_live(load_config()))
+            except Exception as e:
+                self._send_json(500, {"error": str(e)})
         elif path.startswith("/vendor/"):
             self._handle_vendor_file()
         else:
             self._send_json(404, {"error": "not found"})
-
-    def _query_param(self, key, default=None):
-        query = self.path.split("?", 1)[1] if "?" in self.path else ""
-        for part in query.split("&"):
-            if "=" in part:
-                k, v = part.split("=", 1)
-                if k == key:
-                    return urllib.parse.unquote(v)
-        return default
 
     def _handle_vendor_file(self):
         name = self.path[len("/vendor/"):]
