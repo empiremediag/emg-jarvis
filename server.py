@@ -84,7 +84,7 @@ def detect_model_switch(message):
 
 
 def load_config():
-    with open(CONFIG_PATH, "r") as f:
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -176,11 +176,19 @@ def build_system_prompt(agents, boss_name):
 
 
 def call_anthropic(config, system_prompt, history, model=None):
-    api_key = config.get("anthropic_api_key", "")
+    api_key = (config.get("anthropic_api_key") or "").strip()
     if not api_key or api_key == "PUT-YOUR-KEY-HERE":
         return (
             "My connection to the Anthropic API isn't configured yet, sir. "
             "Add a valid key to anthropic_api_key in config.json and restart the server."
+        )
+    try:
+        api_key.encode("latin-1")
+    except UnicodeEncodeError:
+        return (
+            "The anthropic_api_key in config.json has invalid characters in it, sir "
+            "(likely corrupted during copy/paste). Please re-paste it fresh, save, and "
+            "restart the server."
         )
 
     payload = {
