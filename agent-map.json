@@ -1,0 +1,461 @@
+{
+  "COMMAND Orchestrator": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "command"
+    ]
+  },
+  "ORACLE BI": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "forecast",
+      "revenue"
+    ]
+  },
+  "CLOSE COMMANDER": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "close",
+      "closing",
+      "contract"
+    ]
+  },
+  "KAREN": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "karen"
+    ]
+  },
+  "EMPIRE VIDEO COMMANDER": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "empire"
+    ]
+  },
+  "GUARDIAN": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "guardian"
+    ]
+  },
+  "CONTENT STUDIO ORCHESTRATOR": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "content"
+    ]
+  },
+  "SENTINEL": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "sentinel"
+    ]
+  },
+  "BROADCAST MANAGER": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "broadcast"
+    ]
+  },
+  "SOCIAL PLANNER": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "social"
+    ]
+  },
+  "DATA-FORGE": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "data-forge"
+    ]
+  },
+  "AD COMMANDER": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "ad spend",
+      "campaign"
+    ]
+  },
+  "NEXUS MASTER SOP": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "nexus"
+    ]
+  },
+  "REVIVE COMMANDER": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "win-back",
+      "reactivation"
+    ]
+  },
+  "GENESIS PRIME": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "new lead",
+      "top of funnel"
+    ]
+  },
+  "REFERRAL ENGINE": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "referral"
+    ]
+  },
+  "REVIEW COMMANDER": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "review",
+      "reputation"
+    ]
+  },
+  "INTAKE COMMANDER": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "intake",
+      "qualification"
+    ]
+  },
+  "ABLE": {
+    "ghl_signal": "calendar",
+    "match": [
+      "able"
+    ]
+  },
+  "VICTOR": {
+    "ghl_signal": "calendar",
+    "match": [
+      "victor",
+      "cold call",
+      "warm call"
+    ]
+  },
+  "SONYA": {
+    "ghl_signal": "calendar",
+    "match": [
+      "sonya",
+      "support"
+    ]
+  },
+  "NOVA-VOICE": {
+    "ghl_signal": "calendar",
+    "match": [
+      "nova"
+    ]
+  },
+  "SAGE-INBOUND": {
+    "ghl_signal": "calendar",
+    "match": [
+      "sage",
+      "inbound"
+    ]
+  },
+  "ARIA-L": {
+    "ghl_signal": "calendar",
+    "match": [
+      "aria local",
+      "aria-l"
+    ]
+  },
+  "ARIA-E": {
+    "ghl_signal": "calendar",
+    "match": [
+      "aria enterprise",
+      "aria-e"
+    ]
+  },
+  "ARIA-C": {
+    "ghl_signal": "calendar",
+    "match": [
+      "aria success",
+      "aria-c"
+    ]
+  },
+  "ECHO": {
+    "ghl_signal": "calendar",
+    "match": [
+      "echo",
+      "booking"
+    ]
+  },
+  "ATLAS": {
+    "ghl_signal": "calendar",
+    "match": [
+      "atlas",
+      "reactivation"
+    ]
+  },
+  "DOM-Voice": {
+    "ghl_signal": "calendar",
+    "match": [
+      "dom",
+      "referral call"
+    ]
+  },
+  "COMMAND-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "GUARDIAN-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "ORACLE-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "SPARK": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "MAYA": {
+    "ghl_signal": "calendar",
+    "match": [
+      "scheduling"
+    ]
+  },
+  "MAYA-BOOK": {
+    "ghl_signal": "calendar",
+    "match": [
+      "booking"
+    ]
+  },
+  "MARCUS-AGREEMENTS": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "ECHO-BOOK": {
+    "ghl_signal": "calendar",
+    "match": [
+      "echo booking"
+    ]
+  },
+  "GENESIS-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "DATA-FORGE-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "SENTINEL-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "REFERRAL-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "REFERRAL-AI": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "REVIEW-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "REVIEW-AI": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "BROADCAST-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "NURTURE-PRIME": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "REVIVE-FINAL": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "win-back"
+    ]
+  },
+  "INTAKE-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "QUALIFY-BOT": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "qualification"
+    ]
+  },
+  "FOLLOW-UP-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "CLOSE-BOT": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "close",
+      "proposal"
+    ]
+  },
+  "ONBOARD-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "RETAIN-BOT": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "retention"
+    ]
+  },
+  "UPSELL-BOT": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "upsell"
+    ]
+  },
+  "REACTIVATE-BOT": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "reactivation"
+    ]
+  },
+  "SOCIAL-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "VIDEO-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "EMAIL-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "SMS-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "PROPOSAL-BOT": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "proposal"
+    ]
+  },
+  "INVOICE-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "REPORT-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "SCHEDULE-BOT": {
+    "ghl_signal": "calendar",
+    "match": [
+      "schedule"
+    ]
+  },
+  "LEAD-BOT": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "new lead"
+    ]
+  },
+  "NURTURE-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "CONFIRM-BOT": {
+    "ghl_signal": "calendar",
+    "match": [
+      "confirmation"
+    ]
+  },
+  "REMIND-BOT": {
+    "ghl_signal": "calendar",
+    "match": [
+      "reminder"
+    ]
+  },
+  "SURVEY-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "FEEDBACK-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "REACTIVATE-AI": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "reactivation"
+    ]
+  },
+  "COLD-OUTREACH-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "HOT-LIST-BOT": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "hot lead"
+    ]
+  },
+  "PIPELINE-BOT": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "pipeline"
+    ]
+  },
+  "STAGE-BOT": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "pipeline stage"
+    ]
+  },
+  "DEAL-BOT": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "deal"
+    ]
+  },
+  "WIN-BOT": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "closed won"
+    ]
+  },
+  "LOSS-BOT": {
+    "ghl_signal": "pipeline",
+    "match": [
+      "closed lost"
+    ]
+  },
+  "PAUSE-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "RESUME-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "ARCHIVE-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "EXPORT-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "SYNC-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "TAG-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "SEGMENT-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  },
+  "SCORE-BOT": {
+    "ghl_signal": "none",
+    "match": []
+  }
+}

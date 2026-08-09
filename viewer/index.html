@@ -27,6 +27,7 @@
     overflow: hidden;
   }
   #graph { position: fixed; inset: 0; z-index: 1; }
+  #graph canvas { display: block; }
 
   /* ---------- Boot overlay ---------- */
   #boot-overlay {
@@ -100,18 +101,58 @@
     font-size: 0.95rem;
     pointer-events: auto;
   }
+  #status-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    pointer-events: auto;
+  }
   #status-counts {
     display: flex;
     gap: 18px;
     font-size: 0.78rem;
     letter-spacing: 0.05rem;
-    pointer-events: auto;
   }
   #status-counts span { display: flex; align-items: center; gap: 6px; }
   .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
   .dot.active { background: var(--emerald); box-shadow: 0 0 6px var(--emerald); }
   .dot.processing { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
   .dot.offline { background: #555; }
+
+  #settings-gear {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, transform 0.3s ease;
+  }
+  #settings-gear:hover { background: rgba(201,168,76,0.25); transform: rotate(35deg); }
+
+  /* ---------- GHL banner ---------- */
+  #ghl-banner {
+    position: fixed;
+    top: 54px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 21;
+    background: linear-gradient(90deg, rgba(201,168,76,0.95), rgba(224,188,92,0.95));
+    color: #1a1400;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.03rem;
+    padding: 7px 18px;
+    border-radius: 20px;
+    box-shadow: 0 4px 16px rgba(201,168,76,0.35);
+    display: none;
+  }
+  #ghl-banner.visible { display: block; }
 
   /* ---------- Search ---------- */
   #search-wrap {
@@ -301,6 +342,132 @@
   #send-btn { background: var(--gold); color: #1a1400; border-color: var(--gold); }
   #send-btn:hover { background: #e0bc5c; }
 
+  /* ---------- Settings panel ---------- */
+  #settings-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(3, 3, 6, 0.68);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  #settings-overlay.open { opacity: 1; pointer-events: auto; }
+  #settings-panel {
+    width: 460px;
+    max-width: 92vw;
+    max-height: 86vh;
+    overflow-y: auto;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 26px 28px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    transform: translateY(10px) scale(0.98);
+    transition: transform 0.25s ease;
+  }
+  #settings-overlay.open #settings-panel { transform: translateY(0) scale(1); }
+  #settings-panel h2 {
+    margin: 0 0 4px 0;
+    font-size: 1.15rem;
+    letter-spacing: 0.15rem;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .settings-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  #settings-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+  #settings-close:hover { color: var(--text); }
+  .settings-section {
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .settings-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .settings-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.12rem;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .settings-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  select.settings-select {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 10px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    outline: none;
+  }
+  select.settings-select:focus { border-color: var(--gold); }
+  .settings-btn {
+    background: rgba(201,168,76,0.15);
+    border: 1px solid var(--border);
+    color: var(--gold);
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+  }
+  .settings-btn:hover { background: rgba(201,168,76,0.3); }
+  .segmented {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .seg-btn {
+    flex: 1;
+    background: rgba(255,255,255,0.03);
+    border: none;
+    color: var(--text-dim);
+    padding: 9px 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .seg-btn + .seg-btn { border-left: 1px solid var(--border); }
+  .seg-btn.active { background: rgba(201,168,76,0.25); color: var(--gold); font-weight: 600; }
+  .seg-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .ghl-status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+  .about-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    row-gap: 8px;
+    column-gap: 14px;
+    font-size: 0.85rem;
+  }
+  .about-grid .k { color: var(--text-dim); }
+
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.4); border-radius: 3px; }
 </style>
@@ -316,13 +483,18 @@
 
 <div id="status-bar">
   <div class="brand">EMG&#183;JARVIS</div>
-  <div id="status-counts">
-    <span><i class="dot active"></i><span id="count-active">0</span> ACTIVE</span>
-    <span><i class="dot processing"></i><span id="count-processing">0</span> PROCESSING</span>
-    <span><i class="dot offline"></i><span id="count-offline">0</span> OFFLINE</span>
-    <span id="count-total-wrap">&#183; <span id="count-total">0</span> AGENTS</span>
+  <div id="status-bar-right">
+    <div id="status-counts">
+      <span><i class="dot active"></i><span id="count-active">0</span> ACTIVE</span>
+      <span><i class="dot processing"></i><span id="count-processing">0</span> PROCESSING</span>
+      <span><i class="dot offline"></i><span id="count-offline">0</span> OFFLINE</span>
+      <span id="count-total-wrap">&#183; <span id="count-total">0</span> AGENTS</span>
+    </div>
+    <button id="settings-gear" title="Settings">&#9881;</button>
   </div>
 </div>
+
+<div id="ghl-banner"></div>
 
 <div id="search-wrap">
   <input id="search-input" type="text" placeholder="Search agents&hellip;" autocomplete="off">
@@ -350,390 +522,843 @@
   <button class="round-btn" id="send-btn" title="Send">&#10148;</button>
 </div>
 
-<script src="https://unpkg.com/3d-force-graph@1.73.4/dist/3d-force-graph.min.js"></script>
+<div id="settings-overlay">
+  <div id="settings-panel">
+    <div class="settings-header">
+      <h2>Settings</h2>
+      <button id="settings-close" title="Close">&times;</button>
+    </div>
+
+    <div class="settings-section">
+      <span class="settings-label">Brain Model</span>
+      <div class="settings-row">
+        <select id="model-select" class="settings-select">
+          <option value="claude-opus-4-8">Opus 4 &mdash; Smartest</option>
+          <option value="claude-sonnet-4-5">Sonnet 4.5 &mdash; Balanced</option>
+          <option value="claude-haiku-3-5">Haiku &mdash; Fastest</option>
+          <option value="claude-fable-5">Fable 5 &mdash; Creative</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <span class="settings-label">Voice</span>
+      <div class="settings-row">
+        <select id="voice-select" class="settings-select"></select>
+        <button id="voice-preview-btn" class="settings-btn">Preview</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <span class="settings-label">Voice Type</span>
+      <div class="segmented" id="voice-backend-toggle">
+        <button type="button" class="seg-btn" data-backend="browser">Browser</button>
+        <button type="button" class="seg-btn" data-backend="elevenlabs">ElevenLabs</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <span class="settings-label">GHL Bridge</span>
+      <div class="ghl-status-row">
+        <i class="dot offline" id="ghl-status-dot"></i>
+        <span id="ghl-status-text">Checking&hellip;</span>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <span class="settings-label">About</span>
+      <div class="about-grid">
+        <span class="k">Version</span><span id="about-version">&mdash;</span>
+        <span class="k">Agent count</span><span id="about-agent-count">&mdash;</span>
+        <span class="k">Active model</span><span id="about-active-model">&mdash;</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="/graph-data.js"></script>
-<script>
-(function () {
-  "use strict";
-
-  /* ============================================================
-     Session
-     ============================================================ */
-  function getSessionId() {
-    var key = "emg-jarvis-session";
-    var id = localStorage.getItem(key);
-    if (!id) {
-      id = "sess-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
-      localStorage.setItem(key, id);
-    }
-    return id;
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
   }
-  var SESSION_ID = getSessionId();
+}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
 
-  /* ============================================================
-     Graph setup
-     ============================================================ */
-  var groupVal = { SUPER_AGENTS: 10, VOICE_AI: 6, CONVERSATION_AI: 3.5 };
-  var highlighted = new Set();
-  var baseColorOf = {};
-  GRAPH.nodes.forEach(function (n) { baseColorOf[n.id] = n.color; });
+/* ============================================================
+   Constants
+   ============================================================ */
+var APP_VERSION = "v2.0.0";
 
-  var Graph = ForceGraph3D()(document.getElementById("graph"))
-    .graphData(GRAPH)
-    .backgroundColor("#0A0A0F")
-    .showNavInfo(false)
-    .nodeLabel(function (n) { return n.label + " (" + n.group.replace("_", " ") + ")"; })
-    .nodeColor(function (n) { return highlighted.has(n.id) ? "#FFFFFF" : n.color; })
-    .nodeVal(function (n) { return groupVal[n.group] || 4; })
-    .nodeOpacity(0.92)
-    .linkColor(function () { return "rgba(180,190,220,0.18)"; })
-    .linkOpacity(0.35)
-    .linkWidth(0.4)
-    .onNodeClick(function (node) { openAgent(node.id, true); });
+var MODEL_LABELS = {
+  "claude-opus-4-8": "Opus 4 — Smartest",
+  "claude-sonnet-4-5": "Sonnet 4.5 — Balanced",
+  "claude-haiku-3-5": "Haiku — Fastest",
+  "claude-fable-5": "Fable 5 — Creative"
+};
 
-  window.addEventListener("resize", function () {
-    Graph.width(window.innerWidth).height(window.innerHeight);
+var ELEVENLABS_PRESETS = [
+  { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", gender: "female", tone: "calm" },
+  { id: "AZnzlk1XvdvUeBnXmlld", name: "Domi", gender: "female", tone: "strong" },
+  { id: "EXAVITQu4vr4xnSDxMaL", name: "Bella", gender: "female", tone: "warm" },
+  { id: "pNInz6obpgDQGcFmaJgB", name: "Adam", gender: "male", tone: "deep" },
+  { id: "ErXwobaYiN019PkySvjV", name: "Antoni", gender: "male", tone: "warm" },
+  { id: "TxGEqnHWrfWFTfGW9XjX", name: "Josh", gender: "male", tone: "natural" }
+];
+
+var GROUP_COLORS_HEX = { SUPER_AGENTS: 0xC9A84C, VOICE_AI: 0x00E5FF, CONVERSATION_AI: 0x00C896, MEMORY: 0xFFD700 };
+var GROUP_RADIUS = { SUPER_AGENTS: 70, VOICE_AI: 130, CONVERSATION_AI: 190 };
+var GROUP_SIZE = { SUPER_AGENTS: 5.5, VOICE_AI: 3.8, CONVERSATION_AI: 2.4, MEMORY: 3 };
+var groupColors = { SUPER_AGENTS: "#C9A84C", VOICE_AI: "#00E5FF", CONVERSATION_AI: "#00C896", MEMORY: "#FFD700" };
+
+var GHL_BRIDGE_URL = "http://localhost:8090";
+
+/* ============================================================
+   Session
+   ============================================================ */
+function getSessionId() {
+  var key = "emg-jarvis-session";
+  var id = localStorage.getItem(key);
+  if (!id) {
+    id = "sess-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem(key, id);
+  }
+  return id;
+}
+var SESSION_ID = getSessionId();
+
+function currentModel() {
+  return localStorage.getItem("emg-jarvis-model") || "claude-opus-4-8";
+}
+function setCurrentModel(modelId) {
+  localStorage.setItem("emg-jarvis-model", modelId);
+  var select = document.getElementById("model-select");
+  if (select) select.value = modelId;
+  updateAboutSection();
+}
+
+/* ============================================================
+   Three.js scene
+   ============================================================ */
+var container = document.getElementById("graph");
+
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0A0A0F);
+
+var camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 6000);
+camera.position.set(0, 90, 420);
+
+var renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+if ("outputColorSpace" in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+container.appendChild(renderer.domElement);
+
+var controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 40;
+controls.maxDistance = 1600;
+controls.target.set(0, 0, 0);
+
+scene.add(new THREE.AmbientLight(0x666680, 1.1));
+var pointLight1 = new THREE.PointLight(0xC9A84C, 1.4, 1200);
+pointLight1.position.set(220, 220, 220);
+scene.add(pointLight1);
+var pointLight2 = new THREE.PointLight(0x00E5FF, 1.0, 1200);
+pointLight2.position.set(-220, -120, -220);
+scene.add(pointLight2);
+
+/* ---- Starfield ---- */
+var starGeometry = new THREE.BufferGeometry();
+var STAR_COUNT = 2000;
+var starPositions = new Float32Array(STAR_COUNT * 3);
+for (var si = 0; si < STAR_COUNT; si++) {
+  starPositions[si * 3] = (Math.random() - 0.5) * 3000;
+  starPositions[si * 3 + 1] = (Math.random() - 0.5) * 3000;
+  starPositions[si * 3 + 2] = (Math.random() - 0.5) * 3000;
+}
+starGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
+var starField = new THREE.Points(starGeometry, new THREE.PointsMaterial({
+  color: 0xffffff, size: 1.3, sizeAttenuation: true, transparent: true, opacity: 0.85
+}));
+scene.add(starField);
+
+/* ---- Node layout (Fibonacci sphere per group, deterministic) ---- */
+function fibonacciSpherePoint(index, total, radius) {
+  if (total <= 1) return { x: radius * 0.6, y: radius * 0.3, z: radius * 0.6 };
+  var offset = 2 / total;
+  var increment = Math.PI * (3 - Math.sqrt(5));
+  var y = (index * offset - 1) + offset / 2;
+  var r = Math.sqrt(Math.max(0, 1 - y * y));
+  var phi = index * increment;
+  return { x: Math.cos(phi) * r * radius, y: y * radius, z: Math.sin(phi) * r * radius };
+}
+
+function computeLayout(nodes) {
+  var byGroup = {};
+  nodes.forEach(function (n) { (byGroup[n.group] = byGroup[n.group] || []).push(n); });
+  Object.keys(byGroup).forEach(function (g) {
+    var list = byGroup[g];
+    var radius = GROUP_RADIUS[g] || 150;
+    list.forEach(function (n, i) { n.__pos = fibonacciSpherePoint(i, list.length, radius); });
+  });
+}
+computeLayout(GRAPH.nodes);
+
+/* ---- Node meshes ---- */
+var meshGroup = new THREE.Group();
+scene.add(meshGroup);
+
+var nodeMeshes = {};
+var sphereGeomCache = {};
+function getSphereGeometry(radius) {
+  var key = radius.toFixed(2);
+  if (!sphereGeomCache[key]) sphereGeomCache[key] = new THREE.SphereGeometry(radius, 20, 20);
+  return sphereGeomCache[key];
+}
+function colorForGroup(group) {
+  return GROUP_COLORS_HEX[group] !== undefined ? GROUP_COLORS_HEX[group] : 0x888888;
+}
+
+function addNodeMesh(node) {
+  var size = GROUP_SIZE[node.group] || 3;
+  var color = colorForGroup(node.group);
+  var material = new THREE.MeshStandardMaterial({
+    color: color, emissive: color, emissiveIntensity: 0.7, metalness: 0.35, roughness: 0.35
+  });
+  var mesh = new THREE.Mesh(getSphereGeometry(size), material);
+  mesh.position.set(node.__pos.x, node.__pos.y, node.__pos.z);
+  mesh.userData = { id: node.id, baseEmissive: color, phase: (node.id % 97) * 0.31, baseIntensity: 0.7 };
+  meshGroup.add(mesh);
+  nodeMeshes[node.id] = mesh;
+  return mesh;
+}
+GRAPH.nodes.forEach(addNodeMesh);
+
+/* ---- Links (single LineSegments, rebuilt on graph change) ---- */
+var linksMesh = new THREE.LineSegments(
+  new THREE.BufferGeometry(),
+  new THREE.LineBasicMaterial({ color: 0xB4BEDC, transparent: true, opacity: 0.28 })
+);
+meshGroup.add(linksMesh);
+
+function rebuildLinks() {
+  var positions = [];
+  GRAPH.links.forEach(function (l) {
+    var s = nodeMeshes[l.source], t = nodeMeshes[l.target];
+    if (!s || !t) return;
+    positions.push(s.position.x, s.position.y, s.position.z, t.position.x, t.position.y, t.position.z);
+  });
+  linksMesh.geometry.dispose();
+  var geom = new THREE.BufferGeometry();
+  geom.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  linksMesh.geometry = geom;
+}
+rebuildLinks();
+
+/* ---- Selection + camera flight ---- */
+var selectedMesh = null;
+function selectNodeMesh(mesh) {
+  if (selectedMesh && selectedMesh !== mesh) selectedMesh.scale.set(1, 1, 1);
+  if (mesh) mesh.scale.set(1.4, 1.4, 1.4);
+  selectedMesh = mesh;
+}
+
+function flyToNode(mesh, ms) {
+  if (!mesh) return;
+  var duration = ms || 1000;
+  var startTime = performance.now();
+  var startCamPos = camera.position.clone();
+  var startTarget = controls.target.clone();
+  function step(now) {
+    var t = Math.min(1, (now - startTime) / duration);
+    var ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    var worldPos = new THREE.Vector3();
+    mesh.getWorldPosition(worldPos);
+    var dist = worldPos.length() || 1;
+    var camPos = worldPos.clone().multiplyScalar(1 + 55 / dist);
+    camera.position.lerpVectors(startCamPos, camPos, ease);
+    controls.target.lerpVectors(startTarget, worldPos, ease);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ---- Highlight cluster (chat references) ---- */
+var highlighted = new Set();
+function lightUpCluster(ids, focusFirst) {
+  highlighted = new Set(ids);
+  if (focusFirst && ids.length) {
+    var mesh = nodeMeshes[ids[0]];
+    if (mesh) flyToNode(mesh, 1200);
+  }
+  setTimeout(function () { highlighted = new Set(); }, 4000);
+}
+
+/* ---- Click detection (distinguish click from orbit-drag) ---- */
+var raycaster = new THREE.Raycaster();
+var pointerNDC = new THREE.Vector2();
+var pointerDownPos = null, pointerDownTime = 0;
+
+renderer.domElement.addEventListener("pointerdown", function (e) {
+  pointerDownPos = { x: e.clientX, y: e.clientY };
+  pointerDownTime = performance.now();
+});
+
+renderer.domElement.addEventListener("pointerup", function (e) {
+  if (!pointerDownPos) return;
+  var dx = e.clientX - pointerDownPos.x, dy = e.clientY - pointerDownPos.y;
+  var moved = Math.sqrt(dx * dx + dy * dy);
+  var elapsed = performance.now() - pointerDownTime;
+  pointerDownPos = null;
+  if (moved > 6 || elapsed > 500) return;
+
+  pointerNDC.x = (e.clientX / window.innerWidth) * 2 - 1;
+  pointerNDC.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointerNDC, camera);
+  var meshes = Object.keys(nodeMeshes).map(function (k) { return nodeMeshes[k]; });
+  var hits = raycaster.intersectObjects(meshes, false);
+  if (hits.length) openAgent(hits[0].object.userData.id, true);
+});
+
+window.addEventListener("resize", function () {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* ---- Animation loop: auto-rotate + pulse ---- */
+var clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  var t = clock.getElapsedTime();
+  meshGroup.rotation.y += 0.001;
+
+  Object.keys(nodeMeshes).forEach(function (id) {
+    var mesh = nodeMeshes[id];
+    var ud = mesh.userData;
+    if (highlighted.has(ud.id)) {
+      mesh.material.emissive.setHex(0xFFFFFF);
+      mesh.material.emissiveIntensity = 1.1 + Math.sin(t * 4 + ud.phase) * 0.5;
+    } else {
+      mesh.material.emissive.setHex(ud.baseEmissive);
+      mesh.material.emissiveIntensity = ud.baseIntensity + Math.sin(t * 1.6 + ud.phase) * 0.32;
+    }
   });
 
-  function refreshColors() {
-    Graph.nodeColor(Graph.nodeColor());
-  }
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
 
-  function flyToNode(node, ms) {
-    if (!node) return;
-    var distance = 130;
-    var distRatio = 1 + distance / Math.hypot(node.x || 1, node.y || 1, node.z || 1);
-    Graph.cameraPosition(
-      { x: (node.x || 0) * distRatio, y: (node.y || 0) * distRatio, z: (node.z || 0) * distRatio },
-      node,
-      ms || 1000
-    );
-  }
-
-  function nodeById(id) {
-    return Graph.graphData().nodes.find(function (n) { return n.id === id; });
-  }
-
-  function lightUpCluster(ids, focusFirst) {
-    highlighted = new Set(ids);
-    refreshColors();
-    if (focusFirst && ids.length) {
-      var first = nodeById(ids[0]);
-      flyToNode(first, 1200);
-    }
-    setTimeout(function () {
-      highlighted = new Set();
-      refreshColors();
-    }, 4000);
-  }
-
-  /* ============================================================
-     Status bar
-     ============================================================ */
-  function refreshStatus() {
-    fetch("/status")
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        document.getElementById("count-active").textContent = data.active || 0;
-        document.getElementById("count-processing").textContent = data.processing || 0;
-        document.getElementById("count-offline").textContent = data.offline || 0;
-        document.getElementById("count-total").textContent = data.total || 0;
-      })
-      .catch(function () {
-        var counts = { active: 0, processing: 0, offline: 0, total: GRAPH.nodes.length };
-        GRAPH.nodes.forEach(function (n) { counts[n.status] = (counts[n.status] || 0) + 1; });
-        document.getElementById("count-active").textContent = counts.active;
-        document.getElementById("count-processing").textContent = counts.processing;
-        document.getElementById("count-offline").textContent = counts.offline;
-        document.getElementById("count-total").textContent = counts.total;
-      });
-  }
-  refreshStatus();
-  setInterval(refreshStatus, 15000);
-
-  /* ============================================================
-     Boot overlay + voice greeting
-     ============================================================ */
-  function timeOfDayGreeting() {
-    var h = new Date().getHours();
-    if (h < 12) return "morning";
-    if (h < 18) return "afternoon";
-    return "evening";
-  }
-
-  function pickVoice() {
-    var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-    var gb = voices.find(function (v) { return v.lang === "en-GB"; });
-    return gb || voices.find(function (v) { return /en-GB/i.test(v.lang); }) || voices[0];
-  }
-
-  function speak(text) {
-    if (!window.speechSynthesis || !text) return;
-    var utter = new SpeechSynthesisUtterance(text);
-    var voice = pickVoice();
-    if (voice) utter.voice = voice;
-    utter.lang = "en-GB";
-    utter.rate = 1.0;
-    utter.pitch = 1.0;
-    window.speechSynthesis.speak(utter);
-  }
-
-  function bootSequence() {
-    var fill = document.getElementById("boot-bar-fill");
-    var status = document.getElementById("boot-status");
-    var messages = [
-      "Initializing agent mesh…",
-      "Loading SUPER_AGENTS command tier…",
-      "Connecting VOICE_AI channels…",
-      "Syncing CONVERSATION_AI fleet…",
-      "Establishing neural graph…",
-      "All systems nominal."
-    ];
-    var pct = 0;
-    var msgIdx = 0;
-    var interval = setInterval(function () {
-      pct += 4 + Math.random() * 10;
-      if (pct >= 100) pct = 100;
-      fill.style.width = pct + "%";
-      var target = Math.floor((pct / 100) * (messages.length - 1));
-      if (target !== msgIdx) {
-        msgIdx = target;
-        status.textContent = messages[msgIdx];
-      }
-      if (pct >= 100) {
-        clearInterval(interval);
-        status.textContent = messages[messages.length - 1];
-        setTimeout(function () {
-          document.getElementById("boot-overlay").classList.add("hidden");
-          var greeting = "Good " + timeOfDayGreeting() + ", sir. " +
-            GRAPH.nodes.length + " agents are online across the EMG-JARVIS fleet.";
-          speak(greeting);
-        }, 500);
-      }
-    }, 140);
-  }
-
-  if (window.speechSynthesis) {
-    window.speechSynthesis.onvoiceschanged = function () {};
-  }
-  window.addEventListener("load", bootSequence);
-  setTimeout(bootSequence, 2500);
-  var bootStarted = false;
-  var origBoot = bootSequence;
-  bootSequence = function () {
-    if (bootStarted) return;
-    bootStarted = true;
-    origBoot();
-  };
-
-  /* ============================================================
-     Search
-     ============================================================ */
-  var searchInput = document.getElementById("search-input");
-  searchInput.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
-      var q = searchInput.value.trim().toLowerCase();
-      if (!q) return;
-      var match = GRAPH.nodes.find(function (n) { return n.label.toLowerCase().indexOf(q) !== -1; });
-      if (match) openAgent(match.id, true);
-    }
-  });
-
-  /* ============================================================
-     Side panel
-     ============================================================ */
-  var groupColors = { SUPER_AGENTS: "#C9A84C", VOICE_AI: "#00E5FF", CONVERSATION_AI: "#00C896" };
-  var sidePanel = document.getElementById("side-panel");
-
-  function openAgent(id, fly) {
-    var node = nodeById(id) || GRAPH.nodes.find(function (n) { return n.id === id; });
-    if (!node) return;
-
-    var tag = document.getElementById("panel-group-tag");
-    tag.textContent = node.group.replace("_", " ");
-    var color = groupColors[node.group] || node.color || "#C9A84C";
-    tag.style.background = color + "22";
-    tag.style.color = color;
-    tag.style.border = "1px solid " + color + "66";
-
-    document.getElementById("panel-name").textContent = node.label;
-    document.getElementById("panel-type").textContent = node.type;
-    document.getElementById("panel-status").textContent = node.status;
-    document.getElementById("panel-tools").textContent = node.tools;
-    document.getElementById("panel-description").textContent = node.description;
-
-    var list = document.getElementById("panel-linked-list");
-    list.innerHTML = "";
-    (node.linkedAgents || []).forEach(function (linkedId) {
-      var linked = GRAPH.nodes.find(function (n) { return n.id === linkedId; });
-      if (!linked) return;
-      var li = document.createElement("li");
-      var dotColor = groupColors[linked.group] || linked.color;
-      li.innerHTML = '<i class="dot" style="background:' + dotColor + ';box-shadow:0 0 6px ' + dotColor + '"></i>' + linked.label;
-      li.addEventListener("click", function () { openAgent(linked.id, true); });
-      list.appendChild(li);
+/* ============================================================
+   Status bar
+   ============================================================ */
+function refreshStatus() {
+  fetch("/status")
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      document.getElementById("count-active").textContent = data.active || 0;
+      document.getElementById("count-processing").textContent = data.processing || 0;
+      document.getElementById("count-offline").textContent = data.offline || 0;
+      document.getElementById("count-total").textContent = data.total || 0;
+    })
+    .catch(function () {
+      var counts = { active: 0, processing: 0, offline: 0, total: GRAPH.nodes.length };
+      GRAPH.nodes.forEach(function (n) { counts[n.status] = (counts[n.status] || 0) + 1; });
+      document.getElementById("count-active").textContent = counts.active;
+      document.getElementById("count-processing").textContent = counts.processing;
+      document.getElementById("count-offline").textContent = counts.offline;
+      document.getElementById("count-total").textContent = counts.total;
     });
+}
+refreshStatus();
+setInterval(refreshStatus, 15000);
 
-    sidePanel.classList.add("open");
-    if (fly) flyToNode(node, 1000);
-  }
+/* ============================================================
+   Voice: browser synth + ElevenLabs
+   ============================================================ */
+var elevenLabsConfigured = false;
 
-  document.getElementById("panel-close").addEventListener("click", function () {
-    sidePanel.classList.remove("open");
-  });
+function pickVoice(voices) {
+  voices = voices || (window.speechSynthesis ? window.speechSynthesis.getVoices() : []);
+  var gb = voices.find(function (v) { return v.lang === "en-GB"; });
+  return gb || voices.find(function (v) { return /en-GB/i.test(v.lang); }) || voices[0];
+}
 
-  /* ============================================================
-     Chat bar
-     ============================================================ */
-  var chatInput = document.getElementById("chat-input");
-  var chatAnswerBox = document.getElementById("chat-answer");
-  var chatAnswerText = document.getElementById("chat-answer-text");
-  var answerHideTimer = null;
+function speakBrowser(text) {
+  if (!window.speechSynthesis || !text) return;
+  var utter = new SpeechSynthesisUtterance(text);
+  var uri = localStorage.getItem("emg-jarvis-voice-uri");
+  var voices = window.speechSynthesis.getVoices();
+  var voice = uri && voices.find(function (v) { return v.voiceURI === uri; });
+  if (!voice) voice = pickVoice(voices);
+  if (voice) utter.voice = voice;
+  utter.lang = voice ? voice.lang : "en-GB";
+  utter.rate = 1.0;
+  utter.pitch = 1.0;
+  window.speechSynthesis.speak(utter);
+}
 
-  function firstSentence(text) {
-    var m = text.match(/^.*?[.!?](\s|$)/);
-    return m ? m[0].trim() : text;
-  }
-
-  function showAnswer(text) {
-    chatAnswerText.textContent = text;
-    chatAnswerBox.classList.add("visible");
-    clearTimeout(answerHideTimer);
-    answerHideTimer = setTimeout(function () {
-      chatAnswerBox.classList.remove("visible");
-    }, 20000);
-  }
-
-  function addGoldStarNode(label) {
-    var newId = GRAPH.nodes.length ? Math.max.apply(null, GRAPH.nodes.map(function (n) { return n.id; })) + 1 : 0;
-    var anchor = GRAPH.nodes.find(function (n) { return n.group === "SUPER_AGENTS"; });
-    var node = {
-      id: newId,
-      label: label,
-      group: "MEMORY",
-      type: "memory-capture",
-      status: "active",
-      tools: 0,
-      description: label,
-      linkedAgents: anchor ? [anchor.id] : [],
-      color: "#FFD700"
-    };
-    GRAPH.nodes.push(node);
-    if (anchor) GRAPH.links.push({ source: newId, target: anchor.id });
-    Graph.graphData(GRAPH);
-    setTimeout(function () { flyToNode(nodeById(newId), 1200); }, 300);
-  }
-
-  function sendChat() {
-    var text = chatInput.value.trim();
-    if (!text) return;
-    chatInput.value = "";
-
-    if (/^remember\b/i.test(text)) {
-      var payload = text.replace(/^remember\b[:,]?\s*/i, "");
-      fetch("/remember", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: payload || text })
-      })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          var label = (data && data.label) || "New Memory";
-          showAnswer("Noted, sir. Filed as “" + label + "”.");
-          speak("Noted, sir.");
-          addGoldStarNode(label);
-        })
-        .catch(function () {
-          showAnswer("I couldn't save that memory, sir.");
-        });
-      return;
-    }
-
-    showAnswer("Thinking…");
-    fetch("/chat", {
+function speak(text) {
+  if (!text) return;
+  var backend = localStorage.getItem("emg-jarvis-voice-backend") || "browser";
+  if (backend === "elevenlabs" && elevenLabsConfigured) {
+    var voiceId = localStorage.getItem("emg-jarvis-el-voice-id") || ELEVENLABS_PRESETS[0].id;
+    fetch("/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, session_id: SESSION_ID })
+      body: JSON.stringify({ text: text, voice_id: voiceId })
+    })
+      .then(function (r) { if (!r.ok) throw new Error("tts failed"); return r.blob(); })
+      .then(function (blob) {
+        var url = URL.createObjectURL(blob);
+        var audio = new Audio(url);
+        audio.addEventListener("ended", function () { URL.revokeObjectURL(url); });
+        audio.play();
+      })
+      .catch(function () { speakBrowser(text); });
+    return;
+  }
+  speakBrowser(text);
+}
+
+function guessGender(label) {
+  var n = label.toLowerCase();
+  var female = ["female", "zira", "samantha", "victoria", "karen", "moira", "tessa", "fiona",
+    "susan", "allison", "ava", "serena", "kate", "catherine", "emma", "joanna", "salli",
+    "kimberly", "kendra", "ivy", "aria", "jenny", "sonia", "libby", "olivia", "maisie",
+    "hazel", "zoe", "amelia", "nicky", "stephanie", "kathy", "paulina", "monica", "laura",
+    "ellen", "anna", "alice", "lucia", "yuna", "google us english", "google uk english female"];
+  var male = ["male", "david", "mark", "alex", "daniel", "fred", "george", "james", "guy",
+    "ryan", "william", "oliver", "thomas", "diego", "jorge", "juan", "carlos", "rishi",
+    "google uk english male"];
+  for (var i = 0; i < female.length; i++) if (n.indexOf(female[i]) !== -1) return "Female";
+  for (var j = 0; j < male.length; j++) if (n.indexOf(male[j]) !== -1) return "Male";
+  return "Other";
+}
+
+function getSavedVoiceValue() {
+  var backend = localStorage.getItem("emg-jarvis-voice-backend") || "browser";
+  if (backend === "browser") {
+    var uri = localStorage.getItem("emg-jarvis-voice-uri");
+    return uri ? "browser:" + uri : null;
+  }
+  var id = localStorage.getItem("emg-jarvis-el-voice-id");
+  return id ? "elevenlabs:" + id : null;
+}
+
+function populateVoiceSelect() {
+  var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  var female = [], male = [], other = [];
+  voices.forEach(function (v) {
+    var g = guessGender(v.name + " " + v.lang);
+    (g === "Female" ? female : g === "Male" ? male : other).push(v);
+  });
+
+  var select = document.getElementById("voice-select");
+  var prevValue = select.value;
+  select.innerHTML = "";
+
+  function addGroup(label, list) {
+    if (!list.length) return;
+    var og = document.createElement("optgroup");
+    og.label = label;
+    list.forEach(function (v) {
+      var opt = document.createElement("option");
+      opt.value = "browser:" + v.voiceURI;
+      opt.textContent = v.name + " (" + v.lang + ")";
+      og.appendChild(opt);
+    });
+    select.appendChild(og);
+  }
+  addGroup("Female", female);
+  addGroup("Male", male);
+  addGroup("Other", other);
+
+  var elGroup = document.createElement("optgroup");
+  elGroup.label = "ElevenLabs";
+  ELEVENLABS_PRESETS.forEach(function (p) {
+    var opt = document.createElement("option");
+    opt.value = "elevenlabs:" + p.id;
+    opt.textContent = p.name + " (" + p.gender + ", " + p.tone + ")" + (elevenLabsConfigured ? "" : " – needs API key");
+    opt.disabled = !elevenLabsConfigured;
+    elGroup.appendChild(opt);
+  });
+  select.appendChild(elGroup);
+
+  var saved = getSavedVoiceValue();
+  var hasOption = function (v) {
+    return Array.prototype.some.call(select.options, function (o) { return o.value === v && !o.disabled; });
+  };
+  if (saved && hasOption(saved)) select.value = saved;
+  else if (prevValue && hasOption(prevValue)) select.value = prevValue;
+}
+
+function updateVoiceTypeToggle() {
+  var backend = localStorage.getItem("emg-jarvis-voice-backend") || "browser";
+  document.querySelectorAll("#voice-backend-toggle .seg-btn").forEach(function (btn) {
+    btn.classList.toggle("active", btn.dataset.backend === backend);
+    if (btn.dataset.backend === "elevenlabs") btn.disabled = !elevenLabsConfigured;
+  });
+}
+
+document.getElementById("voice-select").addEventListener("change", function (e) {
+  var value = e.target.value;
+  var idx = value.indexOf(":");
+  var backend = value.slice(0, idx);
+  var id = value.slice(idx + 1);
+  localStorage.setItem("emg-jarvis-voice-backend", backend);
+  if (backend === "browser") localStorage.setItem("emg-jarvis-voice-uri", id);
+  else localStorage.setItem("emg-jarvis-el-voice-id", id);
+  updateVoiceTypeToggle();
+});
+
+document.querySelectorAll("#voice-backend-toggle .seg-btn").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    var backend = btn.dataset.backend;
+    if (backend === "elevenlabs" && !elevenLabsConfigured) return;
+    localStorage.setItem("emg-jarvis-voice-backend", backend);
+    var select = document.getElementById("voice-select");
+    var opt = Array.prototype.find.call(select.options, function (o) {
+      return o.value.indexOf(backend + ":") === 0 && !o.disabled;
+    });
+    if (opt) {
+      select.value = opt.value;
+      var id = opt.value.slice(opt.value.indexOf(":") + 1);
+      if (backend === "browser") localStorage.setItem("emg-jarvis-voice-uri", id);
+      else localStorage.setItem("emg-jarvis-el-voice-id", id);
+    }
+    updateVoiceTypeToggle();
+  });
+});
+
+document.getElementById("voice-preview-btn").addEventListener("click", function () {
+  speak("Good evening, sir. Empire Media Group OS online.");
+});
+
+function fetchVoiceConfig() {
+  fetch("/voice-config")
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      elevenLabsConfigured = !!data.elevenlabs_configured;
+      if (!localStorage.getItem("emg-jarvis-voice-backend")) {
+        var backend = (data.voice_backend === "elevenlabs" && elevenLabsConfigured) ? "elevenlabs" : "browser";
+        localStorage.setItem("emg-jarvis-voice-backend", backend);
+        if (data.elevenlabs_voice_id) localStorage.setItem("emg-jarvis-el-voice-id", data.elevenlabs_voice_id);
+      }
+      populateVoiceSelect();
+      updateVoiceTypeToggle();
+    })
+    .catch(function () {});
+}
+fetchVoiceConfig();
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = populateVoiceSelect;
+}
+
+/* ============================================================
+   Boot overlay + greeting
+   ============================================================ */
+function timeOfDayGreeting() {
+  var h = new Date().getHours();
+  if (h < 12) return "morning";
+  if (h < 18) return "afternoon";
+  return "evening";
+}
+
+function bootSequence() {
+  var fill = document.getElementById("boot-bar-fill");
+  var status = document.getElementById("boot-status");
+  var messages = [
+    "Initializing agent mesh…",
+    "Loading SUPER_AGENTS command tier…",
+    "Connecting VOICE_AI channels…",
+    "Syncing CONVERSATION_AI fleet…",
+    "Establishing neural graph…",
+    "All systems nominal."
+  ];
+  var pct = 0, msgIdx = 0;
+  var interval = setInterval(function () {
+    pct += 4 + Math.random() * 10;
+    if (pct >= 100) pct = 100;
+    fill.style.width = pct + "%";
+    var target = Math.floor((pct / 100) * (messages.length - 1));
+    if (target !== msgIdx) { msgIdx = target; status.textContent = messages[msgIdx]; }
+    if (pct >= 100) {
+      clearInterval(interval);
+      status.textContent = messages[messages.length - 1];
+      setTimeout(function () {
+        document.getElementById("boot-overlay").classList.add("hidden");
+        speak("Good " + timeOfDayGreeting() + ", sir. " + GRAPH.nodes.length + " agents are online across the EMG-JARVIS fleet.");
+      }, 500);
+    }
+  }, 140);
+}
+var bootStarted = false;
+function startBootOnce() {
+  if (bootStarted) return;
+  bootStarted = true;
+  bootSequence();
+}
+window.addEventListener("load", startBootOnce);
+setTimeout(startBootOnce, 2500);
+
+/* ============================================================
+   Search
+   ============================================================ */
+var searchInput = document.getElementById("search-input");
+searchInput.addEventListener("keydown", function (e) {
+  if (e.key === "Enter") {
+    var q = searchInput.value.trim().toLowerCase();
+    if (!q) return;
+    var match = GRAPH.nodes.find(function (n) { return n.label.toLowerCase().indexOf(q) !== -1; });
+    if (match) openAgent(match.id, true);
+  }
+});
+
+/* ============================================================
+   Side panel
+   ============================================================ */
+var sidePanel = document.getElementById("side-panel");
+
+function openAgent(id, fly) {
+  var node = GRAPH.nodes.find(function (n) { return n.id === id; });
+  if (!node) return;
+
+  var tag = document.getElementById("panel-group-tag");
+  tag.textContent = node.group.replace("_", " ");
+  var color = groupColors[node.group] || node.color || "#C9A84C";
+  tag.style.background = color + "22";
+  tag.style.color = color;
+  tag.style.border = "1px solid " + color + "66";
+
+  document.getElementById("panel-name").textContent = node.label;
+  document.getElementById("panel-type").textContent = node.type;
+  document.getElementById("panel-status").textContent = node.status;
+  document.getElementById("panel-tools").textContent = node.tools;
+  document.getElementById("panel-description").textContent = node.description;
+
+  var list = document.getElementById("panel-linked-list");
+  list.innerHTML = "";
+  (node.linkedAgents || []).forEach(function (linkedId) {
+    var linked = GRAPH.nodes.find(function (n) { return n.id === linkedId; });
+    if (!linked) return;
+    var li = document.createElement("li");
+    var dotColor = groupColors[linked.group] || linked.color;
+    li.innerHTML = '<i class="dot" style="background:' + dotColor + ';box-shadow:0 0 6px ' + dotColor + '"></i>' + linked.label;
+    li.addEventListener("click", function () { openAgent(linked.id, true); });
+    list.appendChild(li);
+  });
+
+  sidePanel.classList.add("open");
+  if (fly) {
+    var mesh = nodeMeshes[id];
+    if (mesh) { selectNodeMesh(mesh); flyToNode(mesh, 1000); }
+  }
+}
+
+document.getElementById("panel-close").addEventListener("click", function () {
+  sidePanel.classList.remove("open");
+});
+
+/* ============================================================
+   Chat bar
+   ============================================================ */
+var chatInput = document.getElementById("chat-input");
+var chatAnswerBox = document.getElementById("chat-answer");
+var chatAnswerText = document.getElementById("chat-answer-text");
+var answerHideTimer = null;
+
+function firstSentence(text) {
+  var m = text.match(/^.*?[.!?](\s|$)/);
+  return m ? m[0].trim() : text;
+}
+
+function showAnswer(text) {
+  chatAnswerText.textContent = text;
+  chatAnswerBox.classList.add("visible");
+  clearTimeout(answerHideTimer);
+  answerHideTimer = setTimeout(function () { chatAnswerBox.classList.remove("visible"); }, 20000);
+}
+
+function addGoldStarNode(label) {
+  var newId = GRAPH.nodes.length ? Math.max.apply(null, GRAPH.nodes.map(function (n) { return n.id; })) + 1 : 0;
+  var anchor = GRAPH.nodes.find(function (n) { return n.group === "SUPER_AGENTS"; });
+  var anchorMesh = anchor ? nodeMeshes[anchor.id] : null;
+  var anchorPos = anchorMesh ? anchorMesh.position : new THREE.Vector3(0, 0, 0);
+  var node = {
+    id: newId,
+    label: label,
+    group: "MEMORY",
+    type: "memory-capture",
+    status: "active",
+    tools: 0,
+    description: label,
+    linkedAgents: anchor ? [anchor.id] : [],
+    color: "#FFD700",
+    __pos: {
+      x: anchorPos.x + (Math.random() - 0.5) * 40,
+      y: anchorPos.y + (Math.random() - 0.5) * 40 + 20,
+      z: anchorPos.z + (Math.random() - 0.5) * 40
+    }
+  };
+  GRAPH.nodes.push(node);
+  if (anchor) GRAPH.links.push({ source: newId, target: anchor.id });
+  addNodeMesh(node);
+  rebuildLinks();
+  setTimeout(function () { flyToNode(nodeMeshes[newId], 1200); }, 300);
+}
+
+function sendChat() {
+  var text = chatInput.value.trim();
+  if (!text) return;
+  chatInput.value = "";
+
+  if (/^remember\b/i.test(text)) {
+    var payload = text.replace(/^remember\b[:,]?\s*/i, "");
+    fetch("/remember", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: payload || text })
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        var answer = data.answer || "I have no response, sir.";
-        showAnswer(answer);
-        speak(firstSentence(answer));
-        if (data.nodes && data.nodes.length) {
-          lightUpCluster(data.nodes, true);
-        }
+        var label = (data && data.label) || "New Memory";
+        showAnswer("Noted, sir. Filed as “" + label + "”.");
+        speak("Noted, sir.");
+        addGoldStarNode(label);
       })
-      .catch(function () {
-        showAnswer("I couldn't reach the server, sir.");
-      });
+      .catch(function () { showAnswer("I couldn't save that memory, sir."); });
+    return;
   }
 
-  document.getElementById("send-btn").addEventListener("click", sendChat);
-  chatInput.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") sendChat();
-  });
+  showAnswer("Thinking…");
+  fetch("/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: text, session_id: SESSION_ID, model_override: currentModel() })
+  })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      var answer = data.answer || "I have no response, sir.";
+      showAnswer(answer);
+      speak(firstSentence(answer));
+      if (data.model_switched && data.model) setCurrentModel(data.model);
+      if (data.nodes && data.nodes.length) lightUpCluster(data.nodes, true);
+    })
+    .catch(function () { showAnswer("I couldn't reach the server, sir."); });
+}
 
-  /* ============================================================
-     Mic input (Web Speech API)
-     ============================================================ */
-  var micBtn = document.getElementById("mic-btn");
-  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  var recognition = null;
-  var listening = false;
+document.getElementById("send-btn").addEventListener("click", sendChat);
+chatInput.addEventListener("keydown", function (e) { if (e.key === "Enter") sendChat(); });
 
-  if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.lang = "en-GB";
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+/* ============================================================
+   Mic input (Web Speech API)
+   ============================================================ */
+var micBtn = document.getElementById("mic-btn");
+var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+var recognition = null, listening = false;
 
-    recognition.onresult = function (event) {
-      var transcript = event.results[0][0].transcript;
-      chatInput.value = transcript;
-      sendChat();
-    };
-    recognition.onend = function () {
-      listening = false;
-      micBtn.classList.remove("listening");
-    };
-    recognition.onerror = function () {
-      listening = false;
-      micBtn.classList.remove("listening");
-    };
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.lang = "en-GB";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  recognition.onresult = function (event) {
+    chatInput.value = event.results[0][0].transcript;
+    sendChat();
+  };
+  recognition.onend = function () { listening = false; micBtn.classList.remove("listening"); };
+  recognition.onerror = function () { listening = false; micBtn.classList.remove("listening"); };
+}
+
+micBtn.addEventListener("click", function () {
+  if (!recognition) { showAnswer("Voice input isn't supported in this browser, sir."); return; }
+  if (listening) { recognition.stop(); return; }
+  listening = true;
+  micBtn.classList.add("listening");
+  try { recognition.start(); } catch (e) { listening = false; micBtn.classList.remove("listening"); }
+});
+
+/* ============================================================
+   Settings panel
+   ============================================================ */
+var settingsOverlay = document.getElementById("settings-overlay");
+var modelSelect = document.getElementById("model-select");
+
+function updateAboutSection() {
+  document.getElementById("about-version").textContent = APP_VERSION;
+  document.getElementById("about-agent-count").textContent = GRAPH.nodes.length;
+  document.getElementById("about-active-model").textContent = MODEL_LABELS[currentModel()] || currentModel();
+}
+
+modelSelect.value = currentModel();
+modelSelect.addEventListener("change", function () {
+  setCurrentModel(modelSelect.value);
+});
+
+function refreshGhlStatus() {
+  var dot = document.getElementById("ghl-status-dot");
+  var text = document.getElementById("ghl-status-text");
+  var banner = document.getElementById("ghl-banner");
+  fetch(GHL_BRIDGE_URL + "/ghl/status")
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.configured) {
+        dot.className = "dot active";
+        text.textContent = "Connected";
+        banner.classList.remove("visible");
+      } else {
+        dot.className = "dot offline";
+        text.textContent = "Standby";
+        banner.textContent = data.banner || "Connect GHL: add ghl_token to config.json";
+        banner.classList.add("visible");
+      }
+    })
+    .catch(function () {
+      dot.className = "dot offline";
+      text.textContent = "Unreachable";
+      banner.classList.remove("visible");
+    });
+}
+refreshGhlStatus();
+setInterval(refreshGhlStatus, 20000);
+
+function openSettings() {
+  populateVoiceSelect();
+  updateVoiceTypeToggle();
+  updateAboutSection();
+  refreshGhlStatus();
+  settingsOverlay.classList.add("open");
+}
+function closeSettings() {
+  settingsOverlay.classList.remove("open");
+}
+
+document.getElementById("settings-gear").addEventListener("click", openSettings);
+document.getElementById("settings-close").addEventListener("click", closeSettings);
+settingsOverlay.addEventListener("click", function (e) {
+  if (e.target === settingsOverlay) closeSettings();
+});
+
+/* ============================================================
+   Escape key closes panels
+   ============================================================ */
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") {
+    sidePanel.classList.remove("open");
+    chatAnswerBox.classList.remove("visible");
+    closeSettings();
+    if (recognition && listening) recognition.stop();
   }
+});
 
-  micBtn.addEventListener("click", function () {
-    if (!recognition) {
-      showAnswer("Voice input isn't supported in this browser, sir.");
-      return;
-    }
-    if (listening) {
-      recognition.stop();
-      return;
-    }
-    listening = true;
-    micBtn.classList.add("listening");
-    try {
-      recognition.start();
-    } catch (e) {
-      listening = false;
-      micBtn.classList.remove("listening");
-    }
-  });
-
-  /* ============================================================
-     Escape key closes panels
-     ============================================================ */
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-      sidePanel.classList.remove("open");
-      chatAnswerBox.classList.remove("visible");
-      if (recognition && listening) recognition.stop();
-    }
-  });
-
-}());
 </script>
 </body>
 </html>
