@@ -83,12 +83,28 @@ def fetch_ghl_data(config, force=False):
         if location_id:
             start_ms = int((now - 86400) * 1000)
             end_ms = int((now + 14 * 86400) * 1000)
-            events = ghl_request(config, "/calendars/events", {
-                "locationId": location_id,
-                "startTime": start_ms,
-                "endTime": end_ms,
-            })
-            appointments = events.get("events", events.get("appointments", []))
+
+            # GHL requires one of calendarId/userId/groupId on /calendars/events,
+            # so pull the location's calendars and query events per-calendar,
+            # tagging each event with its calendar name for keyword matching.
+            calendars = ghl_request(config, "/calendars/", {"locationId": location_id})
+            for cal in calendars.get("calendars", []):
+                cal_id = cal.get("id")
+                if not cal_id:
+                    continue
+                try:
+                    events = ghl_request(config, "/calendars/events", {
+                        "locationId": location_id,
+                        "calendarId": cal_id,
+                        "startTime": start_ms,
+                        "endTime": end_ms,
+                    })
+                except urllib.error.HTTPError:
+                    continue
+                for ev in events.get("events", events.get("appointments", [])):
+                    ev = dict(ev)
+                    ev["calendarName"] = cal.get("name", "")
+                    appointments.append(ev)
 
             opps = ghl_request(config, "/opportunities/search", {
                 "location_id": location_id,
