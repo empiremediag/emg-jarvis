@@ -28,8 +28,53 @@ ANTHROPIC_VERSION = "2023-06-01"
 MAX_TOKENS = 1024
 HISTORY_LIMIT = 20  # messages kept per session (user + assistant turns)
 
+ELEVENLABS_TTS_URL = "https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+
 # session_id -> list of {"role": "user"|"assistant", "content": str}
 SESSIONS = {}
+
+# session_id -> model id, set via the model switcher dropdown or a voice command
+SESSION_MODEL = {}
+
+MODEL_LABELS = {
+    "claude-opus-4-8": "Opus 4",
+    "claude-sonnet-4-5": "Sonnet 4.5",
+    "claude-haiku-3-5": "Haiku",
+    "claude-fable-5": "Fable 5",
+}
+
+# spoken/typed aliases -> canonical model id, used to detect "switch to <model>" commands
+MODEL_ALIASES = {
+    "opus 4": "claude-opus-4-8",
+    "opus": "claude-opus-4-8",
+    "claude opus 4 8": "claude-opus-4-8",
+    "claude opus": "claude-opus-4-8",
+    "sonnet 4.5": "claude-sonnet-4-5",
+    "sonnet 4 5": "claude-sonnet-4-5",
+    "sonnet": "claude-sonnet-4-5",
+    "claude sonnet": "claude-sonnet-4-5",
+    "haiku": "claude-haiku-3-5",
+    "claude haiku": "claude-haiku-3-5",
+    "fable 5": "claude-fable-5",
+    "fable": "claude-fable-5",
+    "claude fable": "claude-fable-5",
+}
+
+MODEL_SWITCH_RE = re.compile(r"\b(?:switch to|use)\s+(?:the\s+|claude\s+)?([a-z0-9][a-z0-9 .\-]*?)(?:\s+model)?[.!]?\s*$", re.IGNORECASE)
+
+
+def detect_model_switch(message):
+    """Return a canonical model id if the message asks to switch models, else None."""
+    m = MODEL_SWITCH_RE.search(message.strip())
+    if not m:
+        return None
+    phrase = re.sub(r"\s+", " ", m.group(1).strip().lower())
+    if phrase in MODEL_ALIASES:
+        return MODEL_ALIASES[phrase]
+    for alias, model_id in MODEL_ALIASES.items():
+        if alias in phrase:
+            return model_id
+    return None
 
 
 def load_config():
@@ -76,7 +121,7 @@ def build_system_prompt(agents, boss_name):
     return "\n".join(lines)
 
 
-def call_anthropic(config, system_prompt, history):
+def call_anthropic(config, system_prompt, history, model=None):
     api_key = config.get("anthropic_api_key", "")
     if not api_key or api_key == "PUT-YOUR-KEY-HERE":
         return (
@@ -85,7 +130,7 @@ def call_anthropic(config, system_prompt, history):
         )
 
     payload = {
-        "model": config.get("model", "claude-opus-4-8"),
+        "model": model or config.get("model", "claude-opus-4-8"),
         "max_tokens": MAX_TOKENS,
         "system": system_prompt,
         "messages": [{"role": m["role"], "content": m["content"]} for m in history],
@@ -192,6 +237,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._send_json(200, agent_counts(agents))
             except Exception as e:
                 self._send_json(500, {"error": str(e)})
+        elif self.path == "/voice-config":
+            self._handle_voice_config()
         else:
             self._send_json(404, {"error": "not found"})
 
@@ -200,14 +247,77 @@ class Handler(BaseHTTPRequestHandler):
             self._handle_chat()
         elif self.path == "/remember":
             self._handle_remember()
+        elif self.path == "/tts":
+            self._handle_tts()
         else:
             self._send_json(404, {"error": "not found"})
+
+    def _handle_voice_config(self):
+        try:
+            config = load_config()
+            api_key = (config.get("elevenlabs_api_key") or "").strip()
+            self._send_json(200, {
+                "elevenlabs_configured": bool(api_key),
+                "elevenlabs_voice_id": config.get("elevenlabs_voice_id", ""),
+                "voice_backend": config.get("voice_backend", "browser"),
+            })
+        except Exception as e:
+            self._send_json(500, {"error": str(e)})
+
+    def _handle_tts(self):
+        try:
+            config = load_config()
+            api_key = (config.get("elevenlabs_api_key") or "").strip()
+            if not api_key:
+                self._send_json(400, {"error": "elevenlabs_api_key is not configured"})
+                return
+
+            body = self._read_json_body()
+            text = (body.get("text") or "").strip()
+            voice_id = (body.get("voice_id") or config.get("elevenlabs_voice_id") or "").strip()
+            if not text or not voice_id:
+                self._send_json(400, {"error": "text and voice_id are required"})
+                return
+
+            payload = json.dumps({
+                "text": text,
+                "model_id": "eleven_monolingual_v1",
+                "voice_settings": {"stability": 0.5, "similarity_boost": 0.75},
+            }).encode("utf-8")
+
+            req = urllib.request.Request(
+                ELEVENLABS_TTS_URL.format(voice_id=voice_id),
+                data=payload,
+                method="POST",
+                headers={
+                    "accept": "audio/mpeg",
+                    "content-type": "application/json",
+                    "xi-api-key": api_key,
+                },
+            )
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                audio = resp.read()
+
+            self.send_response(200)
+            self.send_header("Content-Type", "audio/mpeg")
+            self.send_header("Content-Length", str(len(audio)))
+            self._send_cors_headers()
+            self.end_headers()
+            self.wfile.write(audio)
+        except urllib.error.HTTPError as e:
+            detail = e.read().decode("utf-8", errors="replace")
+            self._send_json(e.code, {"error": f"ElevenLabs API error: {detail[:300]}"})
+        except urllib.error.URLError as e:
+            self._send_json(502, {"error": f"Couldn't reach ElevenLabs API: {e.reason}"})
+        except Exception as e:
+            self._send_json(500, {"error": str(e)})
 
     def _handle_chat(self):
         try:
             body = self._read_json_body()
             message = (body.get("message") or "").strip()
             session_id = body.get("session_id") or "default"
+            model_override = (body.get("model_override") or "").strip()
             if not message:
                 self._send_json(400, {"error": "message is required"})
                 return
@@ -215,18 +325,36 @@ class Handler(BaseHTTPRequestHandler):
             config = load_config()
             agents = load_agents()
 
+            if model_override:
+                SESSION_MODEL[session_id] = model_override
+
+            switched_model = detect_model_switch(message)
+            if switched_model:
+                SESSION_MODEL[session_id] = switched_model
+                label = MODEL_LABELS.get(switched_model, switched_model)
+                answer = f"Switching to {label}, sir. I'll use that model from here on out."
+                self._send_json(200, {
+                    "answer": answer,
+                    "nodes": [],
+                    "model": switched_model,
+                    "model_switched": True,
+                })
+                return
+
+            active_model = SESSION_MODEL.get(session_id) or config.get("model", "claude-opus-4-8")
+
             history = SESSIONS.setdefault(session_id, [])
             history.append({"role": "user", "content": message})
             history[:] = history[-HISTORY_LIMIT:]
 
             system_prompt = build_system_prompt(agents, config.get("boss_name", "sir"))
-            answer = call_anthropic(config, system_prompt, history)
+            answer = call_anthropic(config, system_prompt, history, model=active_model)
 
             history.append({"role": "assistant", "content": answer})
             history[:] = history[-HISTORY_LIMIT:]
 
             nodes = find_referenced_nodes(answer, agents)
-            self._send_json(200, {"answer": answer, "nodes": nodes})
+            self._send_json(200, {"answer": answer, "nodes": nodes, "model": active_model})
         except Exception as e:
             self._send_json(500, {"error": str(e)})
 

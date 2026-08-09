@@ -2,5 +2,10 @@
   "anthropic_api_key": "PUT-YOUR-KEY-HERE",
   "model": "claude-opus-4-8",
   "port": 4700,
-  "boss_name": "Able"
+  "boss_name": "Able",
+  "ghl_token": "",
+  "ghl_location_id": "",
+  "elevenlabs_api_key": "",
+  "elevenlabs_voice_id": "",
+  "voice_backend": "browser"
 }
