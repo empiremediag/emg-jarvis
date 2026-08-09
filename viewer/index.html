@@ -468,6 +468,54 @@
   }
   .about-grid .k { color: var(--text-dim); }
 
+  /* ---------- Voice tabs + ElevenLabs cards ---------- */
+  .voice-tab-panel { margin-top: 10px; }
+  .elevenlabs-note {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+  .elevenlabs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    max-height: 280px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+  .el-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    background: rgba(255,255,255,0.03);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .el-card:hover { background: rgba(201,168,76,0.1); }
+  .el-card.selected { border-color: var(--gold); background: rgba(201,168,76,0.16); }
+  .el-card.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+  .el-card .el-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+  .el-card .el-tags { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .el-tag {
+    font-size: 0.62rem;
+    letter-spacing: 0.03rem;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.08);
+    color: var(--text-dim);
+  }
+  .el-card .settings-btn {
+    width: 100%;
+    padding: 6px;
+    font-size: 0.75rem;
+    text-align: center;
+  }
+
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.4); border-radius: 3px; }
 </style>
@@ -536,24 +584,29 @@
           <option value="claude-opus-4-8">Opus 4 &mdash; Smartest</option>
           <option value="claude-sonnet-4-5">Sonnet 4.5 &mdash; Balanced</option>
           <option value="claude-haiku-3-5">Haiku &mdash; Fastest</option>
-          <option value="claude-fable-5">Fable 5 &mdash; Creative</option>
         </select>
       </div>
     </div>
 
     <div class="settings-section">
       <span class="settings-label">Voice</span>
-      <div class="settings-row">
-        <select id="voice-select" class="settings-select"></select>
-        <button id="voice-preview-btn" class="settings-btn">Preview</button>
+      <div class="segmented" id="voice-tabs">
+        <button type="button" class="seg-btn active" data-tab="browser">Browser</button>
+        <button type="button" class="seg-btn" data-tab="elevenlabs">ElevenLabs</button>
       </div>
-    </div>
 
-    <div class="settings-section">
-      <span class="settings-label">Voice Type</span>
-      <div class="segmented" id="voice-backend-toggle">
-        <button type="button" class="seg-btn" data-backend="browser">Browser</button>
-        <button type="button" class="seg-btn" data-backend="elevenlabs">ElevenLabs</button>
+      <div id="voice-tab-browser" class="voice-tab-panel">
+        <div class="settings-row">
+          <select id="voice-select-browser" class="settings-select"></select>
+          <button id="voice-preview-browser-btn" class="settings-btn">Preview</button>
+        </div>
+      </div>
+
+      <div id="voice-tab-elevenlabs" class="voice-tab-panel" style="display:none;">
+        <div id="elevenlabs-note" class="elevenlabs-note" style="display:none;">
+          Add elevenlabs_api_key to config.json (and restart the server) to enable these voices.
+        </div>
+        <div id="elevenlabs-grid" class="elevenlabs-grid"></div>
       </div>
     </div>
 
@@ -604,14 +657,10 @@ var MODEL_LABELS = {
   "claude-fable-5": "Fable 5 — Creative"
 };
 
-var ELEVENLABS_PRESETS = [
-  { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", gender: "female", tone: "calm" },
-  { id: "AZnzlk1XvdvUeBnXmlld", name: "Domi", gender: "female", tone: "strong" },
-  { id: "EXAVITQu4vr4xnSDxMaL", name: "Bella", gender: "female", tone: "warm" },
-  { id: "pNInz6obpgDQGcFmaJgB", name: "Adam", gender: "male", tone: "deep" },
-  { id: "ErXwobaYiN019PkySvjV", name: "Antoni", gender: "male", tone: "warm" },
-  { id: "TxGEqnHWrfWFTfGW9XjX", name: "Josh", gender: "male", tone: "natural" }
-];
+var VOICE_PREVIEW_TEXT = "Good morning sir, Empire Media Group OS is online and all 85 agents are standing by.";
+
+// Populated from GET /voices on load: {browser_voices, elevenlabs_voices, elevenlabs_available}
+var VOICES_DATA = { browser_voices: [], elevenlabs_voices: [], elevenlabs_available: false };
 
 var GROUP_COLORS_HEX = { SUPER_AGENTS: 0xC9A84C, VOICE_AI: 0x00E5FF, CONVERSATION_AI: 0x00C896, MEMORY: 0xFFD700 };
 var GROUP_RADIUS = { SUPER_AGENTS: 70, VOICE_AI: 130, CONVERSATION_AI: 190 };
@@ -920,9 +969,20 @@ refreshStatus();
 setInterval(refreshStatus, 15000);
 
 /* ============================================================
-   Voice: browser synth + ElevenLabs
+   Voice: browser synth + ElevenLabs, both routed through /speak
    ============================================================ */
-var elevenLabsConfigured = false;
+
+// Persisted choice: {backend: "browser"|"elevenlabs", voice_id, voice_name}
+function getVoiceChoice() {
+  try {
+    var raw = localStorage.getItem("emg-jarvis-voice-choice");
+    if (raw) return JSON.parse(raw);
+  } catch (e) { /* fall through to default */ }
+  return { backend: "browser", voice_id: "", voice_name: "" };
+}
+function setVoiceChoice(choice) {
+  localStorage.setItem("emg-jarvis-voice-choice", JSON.stringify(choice));
+}
 
 function pickVoice(voices) {
   voices = voices || (window.speechSynthesis ? window.speechSynthesis.getVoices() : []);
@@ -930,12 +990,26 @@ function pickVoice(voices) {
   return gb || voices.find(function (v) { return /en-GB/i.test(v.lang); }) || voices[0];
 }
 
-function speakBrowser(text) {
+// Curated browser voice entries only carry a display name (server has no
+// visibility into which real SpeechSynthesisVoice objects a given browser
+// exposes), so match against whatever's actually installed at speak time.
+function findBrowserVoice(voiceName, voices) {
+  if (!voiceName) return null;
+  voices = voices || (window.speechSynthesis ? window.speechSynthesis.getVoices() : []);
+  var lower = voiceName.toLowerCase();
+  var exact = voices.find(function (v) { return v.name.toLowerCase() === lower; });
+  if (exact) return exact;
+  var partial = voices.find(function (v) { return v.name.toLowerCase().indexOf(lower) !== -1; });
+  if (partial) return partial;
+  var lastWord = voiceName.split(" ").pop().toLowerCase();
+  return voices.find(function (v) { return v.name.toLowerCase().indexOf(lastWord) !== -1; });
+}
+
+function speakBrowser(text, choice) {
   if (!window.speechSynthesis || !text) return;
   var utter = new SpeechSynthesisUtterance(text);
-  var uri = localStorage.getItem("emg-jarvis-voice-uri");
   var voices = window.speechSynthesis.getVoices();
-  var voice = uri && voices.find(function (v) { return v.voiceURI === uri; });
+  var voice = choice && choice.voice_name ? findBrowserVoice(choice.voice_name, voices) : null;
   if (!voice) voice = pickVoice(voices);
   if (voice) utter.voice = voice;
   utter.lang = voice ? voice.lang : "en-GB";
@@ -946,63 +1020,49 @@ function speakBrowser(text) {
 
 function speak(text) {
   if (!text) return;
-  var backend = localStorage.getItem("emg-jarvis-voice-backend") || "browser";
-  if (backend === "elevenlabs" && elevenLabsConfigured) {
-    var voiceId = localStorage.getItem("emg-jarvis-el-voice-id") || ELEVENLABS_PRESETS[0].id;
-    fetch("/tts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: text, voice_id: voiceId })
+  var choice = getVoiceChoice();
+  fetch("/speak", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text: text, voice_id: choice.voice_id || "", backend: choice.backend || "browser" })
+  })
+    .then(function (r) {
+      var contentType = r.headers.get("Content-Type") || "";
+      if (contentType.indexOf("audio") === 0) return r.blob().then(function (blob) { return { audio: blob }; });
+      return r.json().then(function (data) { return { json: data }; });
     })
-      .then(function (r) { if (!r.ok) throw new Error("tts failed"); return r.blob(); })
-      .then(function (blob) {
-        var url = URL.createObjectURL(blob);
+    .then(function (result) {
+      if (result.audio) {
+        var url = URL.createObjectURL(result.audio);
         var audio = new Audio(url);
         audio.addEventListener("ended", function () { URL.revokeObjectURL(url); });
         audio.play();
-      })
-      .catch(function () { speakBrowser(text); });
-    return;
-  }
-  speakBrowser(text);
+      } else {
+        speakBrowser(text, choice);
+      }
+    })
+    .catch(function () { speakBrowser(text, choice); });
 }
 
-function guessGender(label) {
-  var n = label.toLowerCase();
-  var female = ["female", "zira", "samantha", "victoria", "karen", "moira", "tessa", "fiona",
-    "susan", "allison", "ava", "serena", "kate", "catherine", "emma", "joanna", "salli",
-    "kimberly", "kendra", "ivy", "aria", "jenny", "sonia", "libby", "olivia", "maisie",
-    "hazel", "zoe", "amelia", "nicky", "stephanie", "kathy", "paulina", "monica", "laura",
-    "ellen", "anna", "alice", "lucia", "yuna", "google us english", "google uk english female"];
-  var male = ["male", "david", "mark", "alex", "daniel", "fred", "george", "james", "guy",
-    "ryan", "william", "oliver", "thomas", "diego", "jorge", "juan", "carlos", "rishi",
-    "google uk english male"];
-  for (var i = 0; i < female.length; i++) if (n.indexOf(female[i]) !== -1) return "Female";
-  for (var j = 0; j < male.length; j++) if (n.indexOf(male[j]) !== -1) return "Male";
-  return "Other";
-}
-
-function getSavedVoiceValue() {
-  var backend = localStorage.getItem("emg-jarvis-voice-backend") || "browser";
-  if (backend === "browser") {
-    var uri = localStorage.getItem("emg-jarvis-voice-uri");
-    return uri ? "browser:" + uri : null;
-  }
-  var id = localStorage.getItem("emg-jarvis-el-voice-id");
-  return id ? "elevenlabs:" + id : null;
-}
-
-function populateVoiceSelect() {
-  var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-  var female = [], male = [], other = [];
-  voices.forEach(function (v) {
-    var g = guessGender(v.name + " " + v.lang);
-    (g === "Female" ? female : g === "Male" ? male : other).push(v);
+/* ---- Settings panel: voice tabs ---- */
+function switchVoiceTab(tab) {
+  document.querySelectorAll("#voice-tabs .seg-btn").forEach(function (btn) {
+    btn.classList.toggle("active", btn.dataset.tab === tab);
   });
+  document.getElementById("voice-tab-browser").style.display = tab === "browser" ? "" : "none";
+  document.getElementById("voice-tab-elevenlabs").style.display = tab === "elevenlabs" ? "" : "none";
+}
+document.querySelectorAll("#voice-tabs .seg-btn").forEach(function (btn) {
+  btn.addEventListener("click", function () { switchVoiceTab(btn.dataset.tab); });
+});
 
-  var select = document.getElementById("voice-select");
+function populateBrowserVoiceSelect() {
+  var select = document.getElementById("voice-select-browser");
   var prevValue = select.value;
   select.innerHTML = "";
+
+  var female = VOICES_DATA.browser_voices.filter(function (v) { return v.gender === "female"; });
+  var male = VOICES_DATA.browser_voices.filter(function (v) { return v.gender === "male"; });
 
   function addGroup(label, list) {
     if (!list.length) return;
@@ -1010,95 +1070,98 @@ function populateVoiceSelect() {
     og.label = label;
     list.forEach(function (v) {
       var opt = document.createElement("option");
-      opt.value = "browser:" + v.voiceURI;
-      opt.textContent = v.name + " (" + v.lang + ")";
+      opt.value = v.name;
+      opt.textContent = v.name + (v.style && v.style !== "neutral" ? " (" + v.style + ")" : "");
       og.appendChild(opt);
     });
     select.appendChild(og);
   }
   addGroup("Female", female);
   addGroup("Male", male);
-  addGroup("Other", other);
 
-  var elGroup = document.createElement("optgroup");
-  elGroup.label = "ElevenLabs";
-  ELEVENLABS_PRESETS.forEach(function (p) {
-    var opt = document.createElement("option");
-    opt.value = "elevenlabs:" + p.id;
-    opt.textContent = p.name + " (" + p.gender + ", " + p.tone + ")" + (elevenLabsConfigured ? "" : " – needs API key");
-    opt.disabled = !elevenLabsConfigured;
-    elGroup.appendChild(opt);
-  });
-  select.appendChild(elGroup);
-
-  var saved = getSavedVoiceValue();
-  var hasOption = function (v) {
-    return Array.prototype.some.call(select.options, function (o) { return o.value === v && !o.disabled; });
-  };
-  if (saved && hasOption(saved)) select.value = saved;
-  else if (prevValue && hasOption(prevValue)) select.value = prevValue;
+  var choice = getVoiceChoice();
+  if (choice.backend === "browser" && choice.voice_name) select.value = choice.voice_name;
+  else if (prevValue) select.value = prevValue;
 }
 
-function updateVoiceTypeToggle() {
-  var backend = localStorage.getItem("emg-jarvis-voice-backend") || "browser";
-  document.querySelectorAll("#voice-backend-toggle .seg-btn").forEach(function (btn) {
-    btn.classList.toggle("active", btn.dataset.backend === backend);
-    if (btn.dataset.backend === "elevenlabs") btn.disabled = !elevenLabsConfigured;
-  });
-}
-
-document.getElementById("voice-select").addEventListener("change", function (e) {
-  var value = e.target.value;
-  var idx = value.indexOf(":");
-  var backend = value.slice(0, idx);
-  var id = value.slice(idx + 1);
-  localStorage.setItem("emg-jarvis-voice-backend", backend);
-  if (backend === "browser") localStorage.setItem("emg-jarvis-voice-uri", id);
-  else localStorage.setItem("emg-jarvis-el-voice-id", id);
-  updateVoiceTypeToggle();
+document.getElementById("voice-select-browser").addEventListener("change", function (e) {
+  setVoiceChoice({ backend: "browser", voice_id: "", voice_name: e.target.value });
 });
 
-document.querySelectorAll("#voice-backend-toggle .seg-btn").forEach(function (btn) {
-  btn.addEventListener("click", function () {
-    var backend = btn.dataset.backend;
-    if (backend === "elevenlabs" && !elevenLabsConfigured) return;
-    localStorage.setItem("emg-jarvis-voice-backend", backend);
-    var select = document.getElementById("voice-select");
-    var opt = Array.prototype.find.call(select.options, function (o) {
-      return o.value.indexOf(backend + ":") === 0 && !o.disabled;
+document.getElementById("voice-preview-browser-btn").addEventListener("click", function () {
+  var select = document.getElementById("voice-select-browser");
+  var voiceName = select.value;
+  if (voiceName) setVoiceChoice({ backend: "browser", voice_id: "", voice_name: voiceName });
+  speak(VOICE_PREVIEW_TEXT);
+});
+
+/* ---- Settings panel: ElevenLabs cards ---- */
+function renderElevenLabsCards() {
+  var grid = document.getElementById("elevenlabs-grid");
+  var note = document.getElementById("elevenlabs-note");
+  note.style.display = VOICES_DATA.elevenlabs_available ? "none" : "";
+  grid.innerHTML = "";
+
+  var choice = getVoiceChoice();
+
+  VOICES_DATA.elevenlabs_voices.forEach(function (v) {
+    var card = document.createElement("div");
+    card.className = "el-card" + (VOICES_DATA.elevenlabs_available ? "" : " disabled");
+    if (choice.backend === "elevenlabs" && choice.voice_id === v.id) card.classList.add("selected");
+
+    var name = document.createElement("div");
+    name.className = "el-name";
+    name.textContent = v.name;
+    card.appendChild(name);
+
+    var tags = document.createElement("div");
+    tags.className = "el-tags";
+    [v.gender, v.style].forEach(function (t) {
+      var tag = document.createElement("span");
+      tag.className = "el-tag";
+      tag.textContent = t;
+      tags.appendChild(tag);
     });
-    if (opt) {
-      select.value = opt.value;
-      var id = opt.value.slice(opt.value.indexOf(":") + 1);
-      if (backend === "browser") localStorage.setItem("emg-jarvis-voice-uri", id);
-      else localStorage.setItem("emg-jarvis-el-voice-id", id);
+    card.appendChild(tags);
+
+    var previewBtn = document.createElement("button");
+    previewBtn.type = "button";
+    previewBtn.className = "settings-btn";
+    previewBtn.textContent = "Preview";
+    card.appendChild(previewBtn);
+
+    function selectThisCard() {
+      setVoiceChoice({ backend: "elevenlabs", voice_id: v.id, voice_name: v.name });
+      grid.querySelectorAll(".el-card").forEach(function (c) { c.classList.remove("selected"); });
+      card.classList.add("selected");
     }
-    updateVoiceTypeToggle();
+
+    card.addEventListener("click", selectThisCard);
+    previewBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      selectThisCard();
+      speak(VOICE_PREVIEW_TEXT);
+    });
+
+    grid.appendChild(card);
   });
-});
+}
 
-document.getElementById("voice-preview-btn").addEventListener("click", function () {
-  speak("Good evening, sir. Empire Media Group OS online.");
-});
-
-function fetchVoiceConfig() {
-  fetch("/voice-config")
+function fetchVoices() {
+  return fetch("/voices")
     .then(function (r) { return r.json(); })
     .then(function (data) {
-      elevenLabsConfigured = !!data.elevenlabs_configured;
-      if (!localStorage.getItem("emg-jarvis-voice-backend")) {
-        var backend = (data.voice_backend === "elevenlabs" && elevenLabsConfigured) ? "elevenlabs" : "browser";
-        localStorage.setItem("emg-jarvis-voice-backend", backend);
-        if (data.elevenlabs_voice_id) localStorage.setItem("emg-jarvis-el-voice-id", data.elevenlabs_voice_id);
-      }
-      populateVoiceSelect();
-      updateVoiceTypeToggle();
+      VOICES_DATA.browser_voices = data.browser_voices || [];
+      VOICES_DATA.elevenlabs_voices = data.elevenlabs_voices || [];
+      VOICES_DATA.elevenlabs_available = !!data.elevenlabs_available;
+      populateBrowserVoiceSelect();
+      renderElevenLabsCards();
     })
     .catch(function () {});
 }
-fetchVoiceConfig();
+fetchVoices();
 if (window.speechSynthesis) {
-  window.speechSynthesis.onvoiceschanged = populateVoiceSelect;
+  window.speechSynthesis.onvoiceschanged = populateBrowserVoiceSelect;
 }
 
 /* ============================================================
@@ -1370,8 +1433,8 @@ refreshGhlStatus();
 setInterval(refreshGhlStatus, 20000);
 
 function openSettings() {
-  populateVoiceSelect();
-  updateVoiceTypeToggle();
+  populateBrowserVoiceSelect();
+  renderElevenLabsCards();
   updateAboutSection();
   refreshGhlStatus();
   settingsOverlay.classList.add("open");

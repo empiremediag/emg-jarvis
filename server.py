@@ -36,6 +36,33 @@ HISTORY_LIMIT = 20  # messages kept per session (user + assistant turns)
 
 ELEVENLABS_TTS_URL = "https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
 
+# Curated Web Speech API voices. "id" is a lookup key the frontend fuzzy-matches
+# against whatever SpeechSynthesisVoice objects the user's browser actually
+# exposes (availability varies by OS/browser), not a real platform voice ID.
+BROWSER_VOICES = [
+    {"id": "google-uk-female", "name": "Google UK English Female", "gender": "female", "style": "neutral"},
+    {"id": "google-uk-male", "name": "Google UK English Male", "gender": "male", "style": "neutral"},
+    {"id": "microsoft-zira", "name": "Microsoft Zira", "gender": "female", "style": "neutral"},
+    {"id": "microsoft-david", "name": "Microsoft David", "gender": "male", "style": "neutral"},
+    {"id": "samantha", "name": "Samantha", "gender": "female", "style": "US"},
+    {"id": "alex", "name": "Alex", "gender": "male", "style": "US"},
+    {"id": "karen", "name": "Karen", "gender": "female", "style": "AU"},
+    {"id": "daniel", "name": "Daniel", "gender": "male", "style": "UK"},
+]
+
+ELEVENLABS_VOICES = [
+    {"id": "21m00Tcm4TlvDq8ikWAM", "name": "Rachel", "gender": "female", "style": "calm"},
+    {"id": "AZnzlk1XvdvUeBnXmlld", "name": "Domi", "gender": "female", "style": "strong"},
+    {"id": "EXAVITQu4vr4xnSDxMaL", "name": "Bella", "gender": "female", "style": "warm"},
+    {"id": "ErXwobaYiN019PkySvjV", "name": "Antoni", "gender": "male", "style": "warm"},
+    {"id": "VR6AewLTigWG4xSOukaG", "name": "Arnold", "gender": "male", "style": "deep"},
+    {"id": "pNInz6obpgDQGcFmaJgB", "name": "Adam", "gender": "male", "style": "deep"},
+    {"id": "yoZ06aMxZJJ28mfd3POQ", "name": "Sam", "gender": "male", "style": "raspy"},
+    {"id": "jBpfuIE2acCO8z3wKNLl", "name": "Gigi", "gender": "female", "style": "animated"},
+    {"id": "oWAxZDx7w5VEj9dCyTzz", "name": "Grace", "gender": "female", "style": "southern"},
+    {"id": "ThT5KcBeYPX3keUQqHPh", "name": "Dorothy", "gender": "female", "style": "British"},
+]
+
 # session_id -> list of {"role": "user"|"assistant", "content": str}
 SESSIONS = {}
 
@@ -299,8 +326,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._send_json(200, agent_counts(agents))
             except Exception as e:
                 self._send_json(500, {"error": str(e)})
-        elif self.path == "/voice-config":
-            self._handle_voice_config()
+        elif self.path == "/voices":
+            self._handle_voices()
         elif self.path.startswith("/vendor/"):
             self._handle_vendor_file()
         else:
@@ -324,36 +351,55 @@ class Handler(BaseHTTPRequestHandler):
             self._handle_chat()
         elif self.path == "/remember":
             self._handle_remember()
-        elif self.path == "/tts":
-            self._handle_tts()
+        elif self.path == "/speak":
+            self._handle_speak()
         else:
             self._send_json(404, {"error": "not found"})
 
-    def _handle_voice_config(self):
+    def _handle_voices(self):
         try:
             config = load_config()
             api_key = (config.get("elevenlabs_api_key") or "").strip()
             self._send_json(200, {
-                "elevenlabs_configured": bool(api_key),
-                "elevenlabs_voice_id": config.get("elevenlabs_voice_id", ""),
-                "voice_backend": config.get("voice_backend", "browser"),
+                "browser_voices": BROWSER_VOICES,
+                "elevenlabs_voices": ELEVENLABS_VOICES,
+                "elevenlabs_available": bool(api_key),
             })
         except Exception as e:
             self._send_json(500, {"error": str(e)})
 
-    def _handle_tts(self):
+    def _handle_speak(self):
         try:
+            body = self._read_json_body()
+            text = (body.get("text") or "").strip()
+            voice_id = (body.get("voice_id") or "").strip()
+            backend = (body.get("backend") or "browser").strip().lower()
+
+            if not text:
+                self._send_json(400, {"error": "text is required"})
+                return
+
+            if backend == "browser":
+                self._send_json(200, {"browser": True})
+                return
+
+            if backend != "elevenlabs":
+                self._send_json(400, {"error": f"unknown backend: {backend}"})
+                return
+
             config = load_config()
             api_key = (config.get("elevenlabs_api_key") or "").strip()
             if not api_key:
-                self._send_json(400, {"error": "elevenlabs_api_key is not configured"})
+                self._send_json(400, {"error": "No ElevenLabs key configured"})
+                return
+            try:
+                api_key.encode("latin-1")
+            except UnicodeEncodeError:
+                self._send_json(400, {"error": "elevenlabs_api_key has invalid characters in it"})
                 return
 
-            body = self._read_json_body()
-            text = (body.get("text") or "").strip()
-            voice_id = (body.get("voice_id") or config.get("elevenlabs_voice_id") or "").strip()
-            if not text or not voice_id:
-                self._send_json(400, {"error": "text and voice_id are required"})
+            if not voice_id:
+                self._send_json(400, {"error": "voice_id is required for the elevenlabs backend"})
                 return
 
             payload = json.dumps({
