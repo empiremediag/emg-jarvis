@@ -61,6 +61,7 @@ def ghl_request(config, path, query=None):
             "Authorization": f"Bearer {token}",
             "Version": GHL_API_VERSION,
             "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0 (compatible; EMG-JARVIS-GHL-Bridge/1.0)",
         },
     )
     with urllib.request.urlopen(req, timeout=20) as resp:
