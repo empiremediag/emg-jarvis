@@ -314,10 +314,6 @@
   #cal-side.empty { color: var(--text-dim); font-size: 0.8rem; }
 
   /* ---------- Analytics ---------- */
-  .range-toggle { display: flex; gap: 4px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
-  .range-toggle button { border: none; background: transparent; color: var(--text-dim); padding: 6px 14px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
-  .range-toggle button.active { background: var(--gold); color: #1a1400; }
-
   .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 0.78rem; }
   .bar-row .bar-label { width: 100px; flex: none; color: var(--text-dim); }
   .bar-row .bar-track { flex: 1; background: rgba(255,255,255,0.06); border-radius: 4px; height: 16px; overflow: hidden; }
@@ -349,6 +345,19 @@
   .checkbox-row label { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text); text-transform: none; letter-spacing: 0; }
 
   .empty-state { color: var(--text-dim); font-size: 0.82rem; padding: 20px 4px; }
+
+  /* ---------- Live data banner (GHL errors / not-configured state) ---------- */
+  .live-banner {
+    display: none;
+    background: rgba(255,92,92,0.08);
+    border: 1px solid rgba(255,92,92,0.3);
+    color: var(--red);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.76rem;
+    margin-bottom: 16px;
+  }
+  .live-banner.warn { background: rgba(201,168,76,0.08); border-color: rgba(201,168,76,0.3); color: var(--gold); }
 
   /* ---------- Toast ---------- */
   #toast {
@@ -409,24 +418,28 @@
       <div class="view-header">
         <div>
           <h1>Dashboard</h1>
-          <div class="hint">Live overview of the EMG-JARVIS fleet</div>
+          <div class="hint">Live GoHighLevel data -- auto-refresh 60s</div>
         </div>
+        <button class="btn" id="dashboard-refresh-btn">Refresh</button>
       </div>
 
+      <div class="live-banner" id="dashboard-stats-banner"></div>
+
       <div class="stat-grid">
-        <div class="stat-card"><span class="dot gold" id="stat-total-dot"></span>
-          <div class="num" id="stat-total">--</div><div class="label">Total Agents</div></div>
-        <div class="stat-card"><span class="dot green pulse" id="stat-active-dot"></span>
-          <div class="num" id="stat-active">--</div><div class="label">Active Agents</div></div>
-        <div class="stat-card"><span class="dot cyan" id="stat-content-dot"></span>
-          <div class="num" id="stat-content">--</div><div class="label">Content In Progress</div></div>
-        <div class="stat-card"><span class="dot gold" id="stat-ads-dot"></span>
-          <div class="num" id="stat-ads">--</div><div class="label">Ads Running</div></div>
+        <div class="stat-card"><span class="dot gold"></span>
+          <div class="num" id="stat-contacts">--</div><div class="label">Total Contacts</div></div>
+        <div class="stat-card"><span class="dot green pulse"></span>
+          <div class="num" id="stat-new-leads">--</div><div class="label">New Leads Today</div></div>
+        <div class="stat-card"><span class="dot cyan"></span>
+          <div class="num" id="stat-bookings">--</div><div class="label">Bookings This Week</div></div>
+        <div class="stat-card"><span class="dot gold"></span>
+          <div class="num" id="stat-open-opps">--</div><div class="label">Open Opportunities</div></div>
       </div>
 
       <div class="two-col">
         <div class="panel">
-          <h2>Live Agent Feed <span style="color:var(--text-dim); font-weight:400; font-size:0.68rem;">auto-refresh 10s</span></h2>
+          <h2>Live Conversations <span style="color:var(--text-dim); font-weight:400; font-size:0.68rem;">auto-refresh 60s</span></h2>
+          <div class="live-banner" id="dashboard-feed-banner"></div>
           <div id="activity-feed"><div class="empty-state">Loading...</div></div>
         </div>
         <div class="panel">
@@ -539,9 +552,12 @@
             <button class="active" data-social-view="list">List</button>
             <button data-social-view="calendar">Calendar</button>
           </div>
+          <button class="btn" id="social-refresh-btn">Refresh</button>
           <button class="btn btn-gold" id="add-post-btn">+ Add Post</button>
         </div>
       </div>
+
+      <div class="live-banner" id="social-banner"></div>
 
       <div id="social-list-view">
         <div class="panel">
@@ -560,21 +576,18 @@
       <div class="view-header">
         <div>
           <h1>Analytics</h1>
-          <div class="hint">Fleet performance and pipeline metrics</div>
+          <div class="hint">Live GoHighLevel data -- auto-refresh 60s</div>
         </div>
-        <div class="range-toggle" id="range-toggle">
-          <button class="active" data-range="today">Today</button>
-          <button data-range="7d">7 Days</button>
-          <button data-range="30d">30 Days</button>
-          <button data-range="all">All Time</button>
-        </div>
+        <button class="btn" id="analytics-refresh-btn">Refresh</button>
       </div>
+
+      <div class="live-banner" id="analytics-banner"></div>
 
       <div class="stat-grid">
         <div class="stat-card"><span class="dot gold"></span><div class="num" id="an-leads">--</div><div class="label">Total Leads</div></div>
-        <div class="stat-card"><span class="dot cyan"></span><div class="num" id="an-calls">--</div><div class="label">Calls Booked</div></div>
-        <div class="stat-card"><span class="dot green"></span><div class="num" id="an-deals">--</div><div class="label">Deals Closed</div></div>
-        <div class="stat-card"><span class="dot gold"></span><div class="num" id="an-revenue">--</div><div class="label">Revenue</div></div>
+        <div class="stat-card"><span class="dot green pulse"></span><div class="num" id="an-new-leads">--</div><div class="label">New Leads Today</div></div>
+        <div class="stat-card"><span class="dot cyan"></span><div class="num" id="an-bookings">--</div><div class="label">Bookings This Week</div></div>
+        <div class="stat-card"><span class="dot gold"></span><div class="num" id="an-open-opps">--</div><div class="label">Open Opportunities</div></div>
       </div>
 
       <div class="two-col">
@@ -583,8 +596,8 @@
           <div id="chart-source"></div>
         </div>
         <div class="panel">
-          <h2>Agent Performance</h2>
-          <div id="chart-agents"></div>
+          <h2>Daily Leads (Last 7 Days)</h2>
+          <div id="chart-daily"></div>
         </div>
       </div>
     </section>
@@ -650,7 +663,6 @@
     socialView: "list",
     socialPosts: [],
     selectedDay: null,
-    analyticsRange: "today",
   };
 
   // ---------- helpers ----------
@@ -703,6 +715,33 @@
     });
   }
 
+  // Surfaces GHL "not configured" / transient-error states inline instead of
+  // failing silently -- data (possibly stale/cached) still renders underneath.
+  function renderLiveBanner(sel, data) {
+    var el = $(sel);
+    if (!el) return;
+    if (data && data.configured === false) {
+      el.className = "live-banner";
+      el.textContent = data.error || "GHL is not configured: set ghl_token and ghl_location_id in config.json.";
+      el.style.display = "block";
+    } else if (data && data.error) {
+      el.className = "live-banner warn";
+      el.textContent = "Live data warning: " + data.error;
+      el.style.display = "block";
+    } else if (el.style.display !== "none") {
+      el.style.display = "none";
+      el.textContent = "";
+    }
+  }
+
+  // Auto-refreshes a view's data every intervalMs, but only while that view is on screen.
+  function startAutoRefresh(viewId, loadFn, intervalMs) {
+    setInterval(function () {
+      var view = document.getElementById("view-" + viewId);
+      if (view && view.classList.contains("active")) loadFn();
+    }, intervalMs);
+  }
+
   // ---------- nav / routing ----------
   var VIEWS = ["dashboard", "content-studio", "agent-control", "ad-tracker", "social-queue", "analytics"];
   function showView(view) {
@@ -727,21 +766,12 @@
   // DASHBOARD
   // ======================================================================
   function loadDashboard() {
-    api("/status").then(function (d) {
-      $("#stat-total").textContent = fmtNum(d.total);
-      $("#stat-active").textContent = fmtNum(d.active);
-    }).catch(function () {});
-
-    api("/content/status").then(function (d) {
-      var inProgress = (d.jobs || []).filter(function (j) {
-        return ["Queued", "Generating", "Processing"].indexOf(j.status) !== -1;
-      }).length;
-      $("#stat-content").textContent = fmtNum(inProgress);
-    }).catch(function () {});
-
-    api("/ads/tracker").then(function (d) {
-      var running = (d.ads || []).filter(function (a) { return a.status === "active"; }).length;
-      $("#stat-ads").textContent = fmtNum(running);
+    api("/api/stats").then(function (d) {
+      renderLiveBanner("#dashboard-stats-banner", d);
+      $("#stat-contacts").textContent = fmtNum(d.total_contacts);
+      $("#stat-new-leads").textContent = fmtNum(d.new_leads_today);
+      $("#stat-bookings").textContent = fmtNum(d.bookings_this_week);
+      $("#stat-open-opps").textContent = fmtNum(d.open_opportunities);
     }).catch(function () {});
 
     api("/content/queue").then(function (d) {
@@ -764,21 +794,23 @@
   }
 
   function refreshActivityFeed() {
-    api("/activity").then(function (d) {
-      var events = d.events || [];
+    api("/api/conversations").then(function (d) {
+      renderLiveBanner("#dashboard-feed-banner", d);
+      var events = d.conversations || [];
       var el = $("#activity-feed");
-      if (!events.length) { el.innerHTML = '<div class="empty-state">No recent activity.</div>'; return; }
+      if (!events.length) { el.innerHTML = '<div class="empty-state">No recent conversation activity.</div>'; return; }
       el.innerHTML = events.map(function (e) {
         var dotClass = e.status === "warn" ? "gold" : (e.status === "error" ? "red" : "green");
         return '<div class="feed-row">' +
           '<span class="dot ' + dotClass + '"></span>' +
-          '<div><span class="agent">' + esc(e.agent) + '</span> <span class="action">' + esc(e.action) + '</span></div>' +
-          '<span class="time">' + esc(timeAgo(e.time)) + '</span>' +
+          '<div><span class="agent">' + esc(e.agent) + '</span> <span class="action">' + esc(truncate(e.action, 90)) + '</span></div>' +
+          '<span class="time">' + (e.time ? esc(timeAgo(e.time)) : "") + '</span>' +
           '</div>';
       }).join("");
     }).catch(function () {});
   }
-  setInterval(refreshActivityFeed, 10000);
+  startAutoRefresh("dashboard", loadDashboard, 60000);
+  $("#dashboard-refresh-btn").addEventListener("click", loadDashboard);
 
   // ======================================================================
   // CONTENT STUDIO
@@ -903,20 +935,14 @@
   // AGENT CONTROL
   // ======================================================================
   function loadAgents() {
-    api("/status/agents").then(function (agents) {
-      state.agentsCache = agents;
+    api("/api/agents").then(function (d) {
+      state.agentsCache = d.agents || [];
       renderAgentList();
     }).catch(function () {
       $("#agent-list").innerHTML = '<div class="empty-state">Failed to load agents.</div>';
     });
   }
-  setInterval(function () {
-    if (!$("#view-agent-control").classList.contains("active")) return;
-    api("/status/agents").then(function (agents) {
-      state.agentsCache = agents;
-      renderAgentList();
-    }).catch(function () {});
-  }, 15000);
+  startAutoRefresh("agent-control", loadAgents, 15000);
 
   function statusDot(status) {
     if (status === "active") return '<span class="dot green pulse"></span>';
@@ -1069,7 +1095,8 @@
   // SOCIAL QUEUE
   // ======================================================================
   function loadSocialQueue() {
-    api("/social/schedule").then(function (d) {
+    api("/api/social").then(function (d) {
+      renderLiveBanner("#social-banner", d);
       state.socialPosts = d.posts || [];
       renderSocialList();
       renderCalendar();
@@ -1077,6 +1104,7 @@
       $("#post-list").innerHTML = '<div class="empty-state">Failed to load schedule.</div>';
     });
   }
+  startAutoRefresh("social-queue", loadSocialQueue, 60000);
 
   function renderSocialList() {
     var el = $("#post-list");
@@ -1176,6 +1204,7 @@
     });
   });
 
+  $("#social-refresh-btn").addEventListener("click", loadSocialQueue);
   $("#add-post-btn").addEventListener("click", function () { $("#add-post-modal").classList.add("open"); });
   $("#add-post-cancel").addEventListener("click", function () { $("#add-post-modal").classList.remove("open"); });
   $("#add-post-submit").addEventListener("click", function () {
@@ -1205,16 +1234,31 @@
   // ======================================================================
   // ANALYTICS
   // ======================================================================
+  function fmtDayLabel(dateStr) {
+    var d = new Date(dateStr + "T00:00:00Z");
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  }
+
   function loadAnalytics() {
-    api("/analytics?range=" + encodeURIComponent(state.analyticsRange)).then(function (d) {
-      $("#an-leads").textContent = fmtNum(d.leads);
-      $("#an-calls").textContent = fmtNum(d.calls_booked);
-      $("#an-deals").textContent = fmtNum(d.deals_closed);
-      $("#an-revenue").textContent = fmtMoney(d.revenue);
-      renderBarChart("#chart-source", d.by_source || [], "source");
-      renderBarChart("#chart-agents", d.top_agents || [], "agent", "interactions");
+    api("/api/analytics").then(function (d) {
+      renderLiveBanner("#analytics-banner", d);
+      var sources = d.leads_by_source || [];
+      var totalLeads = sources.reduce(function (sum, r) { return sum + (r.value || 0); }, 0);
+      $("#an-leads").textContent = fmtNum(totalLeads);
+      renderBarChart("#chart-source", sources, "source");
+      var dailyRows = (d.daily_leads || []).map(function (r) { return { label: fmtDayLabel(r.date), value: r.value }; });
+      renderBarChart("#chart-daily", dailyRows, "label");
+    }).catch(function () {});
+
+    api("/api/stats").then(function (d) {
+      $("#an-new-leads").textContent = fmtNum(d.new_leads_today);
+      $("#an-bookings").textContent = fmtNum(d.bookings_this_week);
+      $("#an-open-opps").textContent = fmtNum(d.open_opportunities);
     }).catch(function () {});
   }
+  startAutoRefresh("analytics", loadAnalytics, 60000);
+  $("#analytics-refresh-btn").addEventListener("click", loadAnalytics);
 
   function renderBarChart(sel, rows, labelKey, valueKey) {
     valueKey = valueKey || "value";
@@ -1230,14 +1274,6 @@
         '</div>';
     }).join("");
   }
-
-  $all("#range-toggle button").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      state.analyticsRange = btn.dataset.range;
-      $all("#range-toggle button").forEach(function (b) { b.classList.toggle("active", b === btn); });
-      loadAnalytics();
-    });
-  });
 
   // ---------- boot ----------
   loadDashboard();
