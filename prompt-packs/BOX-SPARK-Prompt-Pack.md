@@ -1,0 +1,146 @@
+# BOX SPARK PROMPT PACK
+## 35 Done-For-You AI Prompts for Live Sellers and Content Creators
+### Empire Media Automations | empiremediagroup.site
+### Upgrade to PRO: https://link.fastpaydirect.com/payment-link/6a8f66d2f9c8c807930ba420
+### Go All-In with EMPIRE: https://link.fastpaydirect.com/payment-link/6a8f673ad6768df0544482e6
+
+---
+
+## SECTION 1: LIVE STREAM OPENERS AND HOOKS
+
+**PROMPT 1 - The Authority Hook**
+You are a professional live stream script writer. Write me a 30-second opening hook for my TikTok/Instagram Live that immediately establishes my authority and gets viewers to stop scrolling. My business is [YOUR BUSINESS TYPE]. My audience is [TARGET AUDIENCE]. Include: one bold credibility statement, one pattern-interrupt line, and a direct question that makes viewers comment. Tone: energetic, confident, real.
+
+**PROMPT 2 - The Curiosity Gap Opener**
+Write me a live stream opening that creates massive curiosity without giving anything away. I am about to reveal [YOUR TOPIC OR OFFER]. My audience struggles with [MAIN PAIN POINT]. Use the curiosity gap technique to tease a transformation without revealing the mechanism. Keep it under 45 seconds when spoken. End with Comment [KEYWORD] below if you want this.
+
+**PROMPT 3 - The Story Hook Opener**
+Write me a personal story opening for my live stream that illustrates the before-and-after transformation my product delivers. My transformation story: [BRIEFLY DESCRIBE YOUR BEFORE AND AFTER]. Keep it emotionally resonant, under 60 seconds, and end with a cliffhanger that leads into my presentation. Make it feel unscripted and real.
+
+**PROMPT 4 - The Social Proof Slam**
+I just got a result or testimonial and want to open my live with it. Result: [PASTE YOUR RESULT OR TESTIMONIAL]. Write me a 30-second live opener that leads with this result, frames it as what is possible for my audience, and immediately invites people to comment their goal so I can help them achieve the same. Platform: [TIKTOK/INSTAGRAM/FACEBOOK].
+
+**PROMPT 5 - The Problem-Agitate Opener**
+Write me a live stream opener that starts by calling out my audience's biggest frustration. My audience's number one problem: [DESCRIBE THE PROBLEM]. My solution: [DESCRIBE WHAT YOU OFFER]. Use the Problem-Agitate-Solve framework for the first 60 seconds. Make the agitation real and relatable so they feel like I am reading their mind.
+
+---
+
+## SECTION 2: ENGAGEMENT AND COMMUNITY BUILDERS
+
+**PROMPT 6 - The Comment Storm**
+Write me 5 engagement questions I can ask during my live stream to spark a comment storm. My niche: [YOUR NICHE]. My audience profile: [DESCRIBE YOUR AUDIENCE]. Questions should be easy to answer quickly, emotionally triggering in a positive way, relevant to the topic I am covering, and designed to increase algorithmic reach through high comment volume.
+
+**PROMPT 7 - The Live Poll Script**
+Write me a verbal live poll script I can run mid-stream. Topic of my live: [TOPIC]. I want viewers to comment A, B, or C to vote. Create 3 meaningful options that reveal where they are in their journey, then write a 30-second transition from the poll results into my next key point. Make it feel natural and interactive.
+
+**PROMPT 8 - The Welcome and Shoutout Loop**
+Write me a reusable shoutout script I can use to welcome new viewers joining my live and make them feel seen. Include a warm welcome line, one sentence about the value they will get if they stay, and a prompt to comment their name and location. Keep it under 20 seconds so I can drop it every few minutes without disrupting my flow.
+
+**PROMPT 9 - The Mid-Live Re-Engagement Reset**
+Write me a mid-live re-engagement script for when energy drops or new people have joined who missed the beginning. I am covering [YOUR TOPIC]. Write a 45-second reset that summarizes what we have covered, creates FOMO for what is coming, and re-energizes the room. Should feel spontaneous, not scripted.
+
+**PROMPT 10 - The Community Moment**
+Write me a community-building moment script I can insert into any live to create deeper emotional connection. My brand values: [YOUR VALUES]. My personal mission: [YOUR MISSION]. Create a 60-second segment where I speak directly to my core community about what we stand for, what we are building together, and why they matter. This turns lurkers into loyal followers.
+
+---
+
+## SECTION 3: PRODUCT PITCH SCRIPTS
+
+**PROMPT 11 - The Natural Pivot Pitch**
+Write me a natural product pitch I can use during a live stream that does not feel salesy. My product: [PRODUCT NAME AND DESCRIPTION]. Price: [PRICE]. Problem it solves: [MAIN PROBLEM]. Write a 90-second pitch using this flow: teach something valuable, show the next step, reveal the shortcut, share the offer. Include a specific CTA and link drop.
+
+**PROMPT 12 - The Transformation Pitch**
+Write a live stream pitch that sells the transformation, not the product. My product: [PRODUCT]. Life BEFORE: [BEFORE STATE]. Life AFTER: [AFTER STATE]. Write a 2-minute pitch script that paints before-and-after in vivid detail, bridges to my product as the mechanism, handles the implied is this worth it objection inline, and closes with urgency. Conversational tone.
+
+**PROMPT 13 - The Demo Pitch**
+I want to demonstrate my product live and pitch simultaneously. Product: [PRODUCT OR SERVICE]. Key features: [LIST 3 KEY FEATURES]. Write a live demo script that introduces what I am about to show, walks through each feature with a real-world benefit not just a feature description, and closes with a direct purchase invitation. Time: 3 minutes.
+
+**PROMPT 14 - The Limited-Time Pitch**
+Write me a live stream urgency pitch for a limited-time offer. Offer: [PRODUCT + PRICE]. What makes it limited: [REASON FOR URGENCY]. Write a 90-second pitch that creates genuine urgency without sounding manipulative. Include 3 urgency reinforcement lines I can sprinkle throughout the live without being repetitive.
+
+**PROMPT 15 - The Soft-Sell Transition**
+I do not like hard pitching on live. Write me a soft-sell transition script that moves my audience toward my offer without it feeling like a sales moment. My offer: [PRODUCT + PRICE + LINK]. Write a 60-second transition that feels like sharing a resource as a friend. Include language that feels like discovery, not a pitch. End with a gentle but clear CTA.
+
+---
+
+## SECTION 4: OBJECTION HANDLERS
+
+**PROMPT 16 - The Price Objection**
+Someone in my live just said that is too expensive. Write me an authentic 60-second live response that validates their concern without apologizing for my price, reframes cost versus cost-of-not-doing-it, and opens the door for them to DM me. Tone: warm, confident, abundant. My offer: [OFFER + PRICE].
+
+**PROMPT 17 - The I Will Think About It Handler**
+A viewer said they want to think about it. Write me an in-live response of 60 seconds that acknowledges their response, asks a curious question to uncover the real hesitation, and invites them to comment or DM. Include what happens if they wait delivered without pressure. Offer: [OFFER + PRICE].
+
+**PROMPT 18 - The Trust Objection**
+A viewer commented how do I know this works. Write me a live response that leads with empathy, shares a specific proof point or mini case study, and invites them to DM me with their specific situation. Keep it under 75 seconds. My product: [PRODUCT]. One real result: [RESULT OR TESTIMONIAL].
+
+**PROMPT 19 - The Not Right for Me Handler**
+A viewer says my product is not for them. Write me a live response that openly agrees they might be right which is disarming, asks one qualifying question to see if they actually are a fit, and if they are gently reframes why this IS exactly for them. My ideal customer: [DESCRIBE IDEAL CUSTOMER].
+
+**PROMPT 20 - The Comparison Handler**
+Someone is comparing my offer to a free alternative. Write me a 75-second response that does not trash the alternative, explains the key difference in terms of results and support, and positions my offer as the premium supported version. My unique advantage: [WHAT MAKES YOU DIFFERENT]. Confident, not defensive.
+
+---
+
+## SECTION 5: CTA AND CLOSE SCRIPTS
+
+**PROMPT 21 - The Power Close**
+Write me a powerful closing CTA for the end of my live stream. Offer: [PRODUCT + PRICE + LINK]. Write a 60-second close that creates final urgency, summarizes the transformation they are buying, gives one clear action to take right now, and ends the live on a high note. Make it feel like a rallying cry, not a sales pitch.
+
+**PROMPT 22 - The Micro CTA Five Variations**
+Write me 5 different micro-CTA scripts I can use throughout my live to keep driving action without interrupting content flow. Each should be under 15 seconds, feel natural, and point to [YOUR LINK OR ACTION]. Vary the approach: curiosity, urgency, social proof, benefit, and FOMO.
+
+**PROMPT 23 - The DM Keyword CTA**
+Write me a CTA that drives viewers to DM me a specific keyword. My offer: [OFFER]. Keyword: [KEYWORD]. Write a 30-second script that makes DMing me feel irresistible like they are getting something exclusive. Make it feel personal, not automated.
+
+**PROMPT 24 - The Booking CTA**
+Write me a live CTA to get viewers to book a free call with me. Calendar type: [FREE 15-MIN STRATEGY CALL]. What they will get: [VALUE PROMISE]. Write a 45-second script that sells the call itself not my offer. Make booking feel low-risk and high-value. Include a sense of limited availability.
+
+**PROMPT 25 - The Replay CTA**
+My live is ending but people came in late. Write me a 30-second closing CTA that promotes the replay, tells them what they missed, and gives them a reason to share the replay link. Include a call to follow or save so they get notified next time I go live.
+
+---
+
+## SECTION 6: POST-LIVE CONTENT CREATION
+
+**PROMPT 26 - The Live Recap Post**
+I just finished a live on [TOPIC]. Key points covered: [LIST 3 TO 5 KEY POINTS]. Write me a recap post for Instagram, Facebook, or LinkedIn that summarizes the live with FOMO energy, highlights the best insight, and drives people to follow for the next live. Include relevant hashtags for [YOUR NICHE].
+
+**PROMPT 27 - The Shareable Quote Extractor**
+Here are my notes from my live stream: [PASTE YOUR NOTES OR KEY LINES]. Identify the single most powerful shareable quote from this live. Format it as: a standalone quote post, a 60-second short-form video script using the quote as the hook, and a LinkedIn thought leadership post expanding on the idea.
+
+**PROMPT 28 - The TikTok Clip Script**
+I want to turn a moment from my live into a TikTok clip. The moment: [DESCRIBE THE MOMENT]. Write me: a TikTok hook for the first 3 seconds, a 60-second script delivering the insight from that moment, and a CTA driving them to follow and comment. Optimize for maximum watch time and completion rate.
+
+**PROMPT 29 - The Post-Live Email Broadcast**
+I just went live and want to email my list. Live topic: [TOPIC]. Key insight: [DESCRIBE IT]. Write an email that references the live with FOMO energy, delivers one key takeaway even for those who did not watch, and drives them to watch the replay or take the action I pushed during the live. Give me 3 subject line options. From: Able | Empire Media Automations.
+
+**PROMPT 30 - The 7-Day Content Calendar**
+I just did a live stream about [TOPIC] and want to turn it into a 7-day content calendar. The live covered: [LIST MAIN POINTS]. Create a 7-day content plan repurposing this live into: 2 TikToks, 2 Instagram Reels, 1 YouTube Short, 1 LinkedIn post, and 1 email. For each: platform, format, hook, main point, and CTA.
+
+---
+
+## SECTION 7: DM AND COMMENT REPLY TEMPLATES
+
+**PROMPT 31 - The Keyword DM Opener**
+Someone commented my keyword on my live and I need to start a DM conversation to qualify and present my offer. Write me a DM opening sequence of 3 messages that feels warm and personal, asks a qualifying question, and leads naturally toward presenting my offer. My offer: [OFFER]. Do not be salesy. Be curious and genuinely helpful.
+
+**PROMPT 32 - The 24-Hour Warm Follow-Up**
+Someone watched my live but did not buy or respond. Write me a follow-up DM 24 hours later that references their presence on the live, delivers a bonus insight or value nugget, and re-opens the door to my offer without pressure. Should feel like a genuine check-in, not a sales follow-up. My offer: [OFFER + PRICE].
+
+**PROMPT 33 - The Objection DM Reply**
+Someone DMed me saying they are interested but [OBJECTION - need to think about it, not sure it is right for me, do not have the money]. Write me a DM response that addresses their specific objection with empathy, offers a creative solution if appropriate, and keeps the conversation open. My offer: [OFFER]. My goal: get them to buy or book a call.
+
+**PROMPT 34 - The Comment Reply Pack Five Scenarios**
+Write me reply templates for 5 common comments on my live or content: 1. Where is the link? 2. Is this legit? 3. How do I get started? 4. I missed the live. 5. This is amazing, I am sharing this. Each reply should feel authentic, drive to my link or DMs, and sound like a real person not a bot. My link: [YOUR LINK].
+
+**PROMPT 35 - The Buyer VIP Thank You DM**
+Someone just purchased from my live stream. Write me a personal thank-you DM that makes them feel like a VIP, sets expectations for what they are about to receive, and opens the door for them to share their experience or refer a friend. My product: [PRODUCT]. What they receive: [DELIVERABLE]. Tone: celebratory, warm, genuine.
+
+---
+
+UPGRADE TO PRO (65 Prompts) - $47: https://link.fastpaydirect.com/payment-link/6a8f66d2f9c8c807930ba420
+GO ALL-IN WITH EMPIRE (130 Prompts + Scripts + Systems) - $97: https://link.fastpaydirect.com/payment-link/6a8f673ad6768df0544482e6
+
+Copyright 2026 Empire Media Automations. All rights reserved.
+Questions? DM us at empiremediagroup.site

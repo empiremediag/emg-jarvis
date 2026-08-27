@@ -1,0 +1,120 @@
+# BOX PRO PROMPT PACK
+## 65 Done-For-You AI Prompts for ChatGPT AND Claude
+### Empire Media Automations | empiremediagroup.site
+### Go All-In with EMPIRE: https://link.fastpaydirect.com/payment-link/6a8f673ad6768df0544482e6
+
+INCLUDES ALL 35 SPARK PROMPTS PLUS 30 PRO-EXCLUSIVE PROMPTS.
+
+---
+
+## SECTION 8: CHATGPT POWER WORKFLOW PROMPTS
+
+**PROMPT 36 - The Full Content Machine**
+You are an expert content strategist and AI prompt engineer. I run a [YOUR BUSINESS TYPE] and want to build a complete 30-day content machine using ChatGPT. My audience: [TARGET AUDIENCE]. My platform mix: [PLATFORMS]. My core offer: [OFFER]. Build me a full 30-day content workflow that includes: daily content themes, platform-specific formats, prompt templates for each format, and a daily execution checklist I can follow in under 90 minutes. Make it repeatable, scalable, and zero fluff.
+
+**PROMPT 37 - The GPT Sales Script Builder**
+You are a world-class sales copywriter who specializes in conversational selling. I need a complete sales script for [YOUR OFFER] at [PRICE POINT]. My audience: [DESCRIBE AUDIENCE]. Their number one pain point: [PAIN POINT]. Their dream outcome: [DESIRED OUTCOME]. Write me a complete sales conversation script formatted as a dialogue including my opening, qualification questions, pitch, objection responses for price, timing, and trust, and close. Make it feel like a natural conversation, not a sales robot.
+
+**PROMPT 38 - The ChatGPT Brand Voice Trainer**
+I want ChatGPT to write in my exact voice and style for all my content. Here are 3 samples of my existing content: [PASTE 3 CONTENT SAMPLES]. Analyze my writing style including tone, vocabulary, sentence structure, personality, and unique phrases. Then write a brand voice guide I can paste at the beginning of any future ChatGPT session so it writes in my exact voice every time. Include 10 words I always use, 10 I never use, my content personality type, and a sample paragraph written in my voice.
+
+**PROMPT 39 - The Automation Workflow Designer**
+You are an expert AI automation consultant. I run [YOUR BUSINESS] and want to automate this business process: [DESCRIBE THE PROCESS]. Map out the complete automation workflow step by step, which tools and AI models handle each step, what the human touchpoints are, and what the output looks like. Include prompt templates for each AI step in the workflow. Make this implementable in under a week.
+
+**PROMPT 40 - The Viral Hook Generator**
+You are a viral content expert who has studied what makes content explode on TikTok, Instagram, and YouTube. My niche: [YOUR NICHE]. My core message: [YOUR CORE MESSAGE OR OFFER]. Generate 20 viral hook variations using these frameworks: Controversial Opinion, Surprising Statistic, Bold Promise, Story Tease, Direct Challenge. For each hook, explain in one sentence why it works psychologically. Give me 4 hooks per framework.
+
+**PROMPT 41 - The Multi-Platform Post Repurposer**
+I have this piece of content: [PASTE YOUR CONTENT]. Repurpose it into: a 2200-character LinkedIn article, a 60-second TikTok script with hook, body, and CTA, a 5-slide Instagram carousel with text for each slide, a Twitter/X thread of 8 tweets, and a 150-word email newsletter. Maintain the core message but adapt tone, format, and length for each platform.
+
+**PROMPT 42 - The GPT SEO Blog Builder**
+Write me a complete SEO-optimized blog post. Topic: [YOUR TOPIC]. Target keyword: [PRIMARY KEYWORD]. Secondary keywords: [SECONDARY KEYWORDS]. My audience: [TARGET AUDIENCE]. My brand: Empire Media Automations. The blog post should be 1500-plus words and include: an engaging introduction, 4 to 5 H2 subheadings, a clear conclusion with CTA, internal link placeholders, and a meta description. Tone: [YOUR BRAND TONE].
+
+**PROMPT 43 - The Customer Avatar Deep Dive**
+You are a world-class market researcher. I sell [YOUR PRODUCT OR SERVICE] to [BROADLY DESCRIBE YOUR AUDIENCE]. Build me a complete customer avatar profile including: demographics, psychographics, daily life narrative, top 5 frustrations, top 5 desires, exact language they use to describe their problem, objections they will have before buying, media they consume, influencers they follow, and their emotional state at the moment they find my content. Write a 500-word day-in-the-life story from their perspective.
+
+**PROMPT 44 - The Funnel Page Copy Generator**
+You are a direct response copywriter with a track record of 7-figure funnel launches. Write me complete copy for a sales funnel page. Product: [PRODUCT NAME]. Price: [PRICE]. Target audience: [AUDIENCE]. Main transformation: [FROM TO]. Write: above-the-fold headline and subheadline, problem section with 3 agitation bullets, solution introduction, product features presented as benefits with 5 bullets, testimonial placeholders with prompting questions, pricing section with anchor price crossed out, guarantee statement, FAQ with 5 questions and answers, and final CTA.
+
+**PROMPT 45 - The GPT Customer Service Bot Trainer**
+I want to build a ChatGPT-powered customer service bot for my business. Business name: Empire Media Automations. Products and services: [LIST YOUR OFFERINGS]. Common customer questions: [LIST TOP 10 QUESTIONS]. My brand voice: [DESCRIBE YOUR TONE]. Create: a system prompt I can use to configure a custom GPT or AI assistant, response templates for the top 10 questions, escalation triggers for when to hand off to a human, and a script for handling refund and complaint scenarios professionally.
+
+---
+
+## SECTION 9: CLAUDE AI DEEP ANALYSIS PROMPTS
+
+**PROMPT 46 - The Business Strategy Analyst**
+Using Claude's analytical depth, analyze my business situation and give me a brutally honest strategic assessment. Business: Empire Media Automations. Current situation: [DESCRIBE YOUR CURRENT SITUATION]. Market: [DESCRIBE YOUR MARKET]. Goal: [DESCRIBE YOUR 90-DAY GOAL]. Give me: my top 3 strategic opportunities I am not seeing, my top 3 biggest risks or blind spots, a prioritized 90-day action plan with weekly milestones, and the one constraint that if removed would double my results. Be direct. I need truth, not encouragement.
+
+**PROMPT 47 - The Deep Research Engine**
+I need Claude to research [YOUR TOPIC] deeply and give me a comprehensive intelligence brief. Research objectives: [LIST WHAT YOU WANT TO UNDERSTAND]. Deliverable format: executive summary in 3 paragraphs, key findings organized by theme, data points and statistics I can use in content or sales conversations, emerging trends I should be aware of, what my peers are doing in this space, and actionable recommendations based on the research.
+
+**PROMPT 48 - The Content Series Architect**
+Using Claude's long-form reasoning, design me a complete 12-week content series on [YOUR TOPIC] that positions me as the go-to authority in [YOUR NICHE]. For each week provide: content theme and angle, core argument or insight I will make, supporting evidence or examples, connection to the following week as a narrative arc, and CTA that aligns with my funnel at that stage.
+
+**PROMPT 49 - The Offer Stack Designer**
+Using Claude's strategic analysis, help me design a complete offer ecosystem for my business. My core audience: [AUDIENCE]. My expertise: [YOUR EXPERTISE]. Current offer: [CURRENT MAIN OFFER AND PRICE]. Design a complete offer stack with: free lead magnet, tripwire offer in the $7 to $27 range, core offer in the $97 to $497 range, premium offer in the $1000 to $5000 range, and done-for-you retainer at $5000 plus. For each level: describe the offer, ideal price, transformation delivered, and how it feeds the next level.
+
+**PROMPT 50 - The Brand Story Generator**
+Using Claude's narrative intelligence, write my complete brand origin story. Here are my raw facts: [SHARE YOUR REAL STORY]. Transform these facts into a compelling brand narrative that leads with relatable struggle, builds empathy and tension, reveals the turning point or insight, shows the transformation, and connects to why I now serve others. Write it in first person, conversational but powerful. 800 to 1000 words.
+
+**PROMPT 51 - The Advanced Email Sequence Architect**
+Design a complete 10-email nurture sequence for [YOUR LEAD MAGNET OR ENTRY POINT]. My audience: [AUDIENCE]. My core offer: [OFFER + PRICE]. Sequence objective: move a cold lead to a warm buyer in 14 days. For each email provide: day number and send time, subject line with 3 variations, preview text, email purpose, complete email body, and CTA.
+
+**PROMPT 52 - The Competitive Intelligence Brief**
+Analyze the [YOUR NICHE] market from a strategic perspective. I want to understand: the most common mistakes businesses in this space make with their marketing and offers, what is working versus what has become saturated, the white space of angles, audiences, or approaches that are underserved, and how I should position Empire Media Automations to stand out. Give me specific actionable positioning language.
+
+**PROMPT 53 - The Live Stream Content Series Planner**
+Design a 30-day live stream content calendar that builds my authority and drives consistent sales. My niche: [YOUR NICHE]. My core offer: [OFFER]. My target platform: [TIKTOK/INSTAGRAM/FACEBOOK/YOUTUBE]. For each live provide: date and recommended time, episode title and hook, main teaching point, product tie-in moment, expected engagement tactics, and post-live content repurposing plan.
+
+**PROMPT 54 - The Objection Mining Deep Dive**
+I need to understand every possible objection my prospect has before buying [YOUR OFFER AT PRICE POINT]. My target buyer: [DESCRIBE IDEAL BUYER]. Using deep psychological analysis, map out: every logical objection they will have, every emotional objection including fear, doubt, and past failures, the root belief behind each objection, the single most powerful reframe for each objection, and the order in which objections typically surface. Then write a pre-emptive objection handling section I can include in my sales page copy.
+
+**PROMPT 55 - The High-Ticket Closer Script**
+Write me a complete high-ticket discovery call script for closing [YOUR HIGH-TICKET OFFER] at [PRICE POINT]. Call structure: warm opening and rapport for 5 minutes, agenda setting, discovery questions with 10 questions and follow-ups, situation analysis, the bridge showing how your offer solves their exact situation, presenting the offer, handling the top 5 objections with word-for-word scripts, and the close and next steps. Total call time: 45 minutes. Include transition phrases between each stage.
+
+---
+
+## SECTION 10: LIVE AD COPY FRAMEWORKS
+
+**PROMPT 56 - The Live-to-Ad Repurposer**
+I went live on [PLATFORM] and said this during my stream: [PASTE THE LIVE CLIP TRANSCRIPT OR NOTES]. Turn this raw live content into: a Facebook and Instagram ad script of 60 seconds, a TikTok Spark Ad script of 30 seconds, a YouTube pre-roll ad script of 15 seconds, and a retargeting ad for people who saw my live but did not buy. For each ad include hook, body, and CTA.
+
+**PROMPT 57 - The UGC-Style Ad Script**
+Write me a UGC user-generated content style ad script that feels completely authentic like a customer review video, not an ad. Product: [PRODUCT]. Price: [PRICE]. Transformation: [FROM TO]. Write a 60-second first-person script from the perspective of a satisfied customer. Include: relatable struggle at the start, the discovery moment, 3 specific results they got, and a recommendation close.
+
+**PROMPT 58 - The Problem-Aware Ad**
+Write me a paid ad targeting people who know they have the problem but are not yet aware of my solution. Their problem: [SPECIFIC PROBLEM]. My solution: [YOUR OFFER]. Platform: [META/TIKTOK/YOUTUBE]. Write a complete ad with: a problem-led hook that stops the scroll, 3 agitation lines that deepen the pain, a pivot to the solution, social proof line, and CTA. Keep it under 90 seconds for video or 150 words for static.
+
+**PROMPT 59 - The Retargeting Script**
+Write me a retargeting ad for people who visited my page or watched my content but did not buy. They saw [WHAT THEY SAW]. They did not buy because of [LIKELY REASON]. Write a retargeting ad that acknowledges they have already seen my content subtly, resolves their most likely objection, adds social proof, and creates a reason to act now. Platform: [META/TIKTOK].
+
+**PROMPT 60 - The Authority Content Ad**
+I want to run a dark post authority ad that builds trust and sells simultaneously without looking like an ad. Topic I am an authority on: [YOUR TOPIC]. My offer that connects: [YOUR OFFER]. Write a 500-word Facebook authority post that tells a story positioning me as the expert, delivers genuine value in the middle, and naturally leads to my offer at the end without a hard pitch.
+
+---
+
+## SECTION 11: EMAIL NURTURE SEQUENCE BUILDERS
+
+**PROMPT 61 - The Welcome Sequence 5 Emails**
+Write me a 5-email welcome sequence for new subscribers to Empire Media Automations. Day 1: Deliver the lead magnet and set expectations. Day 2: Share my brand story. Day 3: Deliver a quick-win lesson they can implement today. Day 4: Social proof with results and testimonials. Day 5: Make the offer presenting [YOUR CORE OFFER + PRICE]. For each email: subject line with 3 variations, preview text, complete body copy, and CTA. From: Able | Empire Media Automations.
+
+**PROMPT 62 - The Re-Engagement Campaign 3 Emails**
+Write me a 3-email re-engagement campaign for subscribers who have not opened in 60-plus days. Email 1: Pattern interrupt subject line. Are you still there? Casual and direct. Email 2: Value-first. Give away your best tip with no strings attached. Email 3: The breakup. Tell them you are removing them unless they click. Each email should have 3 subject line variations.
+
+**PROMPT 63 - The Launch Sequence 7 Emails**
+Write me a complete product launch email sequence for [YOUR OFFER AT PRICE POINT]. Pre-launch Email 1: Announce something big is coming. Email 2: Behind-the-scenes of what you have been building. Cart Open Email 3: It is live. Email 4: FAQ and objection handling. Email 5: Social proof and results. Urgency Email 6: 24 hours left. Email 7: Final call tonight at midnight.
+
+**PROMPT 64 - The Post-Purchase Ascension Sequence 4 Emails**
+Write me a 4-email post-purchase sequence that delivers value and ascends buyers to the next offer. Context: they just bought [LOWER TIER PRODUCT AT PRICE]. Next offer: [HIGHER TIER PRODUCT AT PRICE]. Email 1 Day 1: VIP welcome and deliver the product. Email 2 Day 3: Quick-win tip that gets them an early result. Email 3 Day 5: Introduce the next level framed as the logical next step. Email 4 Day 7: Last chance to upgrade at the current price.
+
+**PROMPT 65 - The Referral Activation Email**
+Write me an email that activates my existing buyers to refer new customers. Context: My buyers love [YOUR PRODUCT] and have seen results. I want them to refer friends in exchange for [REFERRAL INCENTIVE OR RECOGNITION]. Write a 300-word email that makes them feel like VIPs, gives them a clear reason to share, and makes sharing as easy as possible with a suggested share message they can forward or post.
+
+---
+
+GO ALL-IN WITH EMPIRE (130 Prompts + Video Scripts + Content Clone System + Business Scaling Systems) - $97
+https://link.fastpaydirect.com/payment-link/6a8f673ad6768df0544482e6
+
+Copyright 2026 Empire Media Automations. All rights reserved.
+Questions? DM us at empiremediagroup.site
