@@ -1,0 +1,5 @@
+BOX EMPIRE BUNDLE - 130 Prompts
+Empire Media Automations | empiremediagroup.site
+
+All 130 prompts from the EMPIRE Bundle are in the companion .md file at:
+https://github.com/empiremediag/emg-jarvis/blob/main/prompt-packs/BOX-EMPIRE-Bundle.md
